@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تسجيل الطلاب بالتخصصات</title>
+
+    <!-- Favicon and Social Media Meta Tags -->
+    <link rel="icon" href="https://ai4roadmap.com/logo.png" type="image/png">
+    
+    <meta name="description" content="نظام تسجيل وحصر الطلاب حسب التخصصات العلمية لجامعة حلوان التكنولوجية.">
+    <meta name="keywords" content="تسجيل الطلاب, جامعة حلوان التكنولوجية, نظام تسجيل, حصر التخصصات">
+    
+    <!-- Open Graph / Facebook / WhatsApp -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://ai4roadmap.com/">
+    <meta property="og:title" content="تسجيل التخصصات | جامعة حلوان التكنولوجية">
+    <meta property="og:description" content="نظام تسجيل وحصر الطلاب حسب التخصصات العلمية.">
+    <meta property="og:image" content="https://ai4roadmap.com/logo.png">
+    <meta property="og:image:width" content="512">
+    <meta property="og:image:height" content="512">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://ai4roadmap.com/">
+    <meta property="twitter:title" content="تسجيل التخصصات | جامعة حلوان التكنولوجية">
+    <meta property="twitter:description" content="نظام تسجيل وحصر الطلاب حسب التخصصات العلمية.">
+    <meta property="twitter:image" content="https://ai4roadmap.com/logo.png">
+
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-4TENK8FGB1"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-4TENK8FGB1');
+        </script>
+
+
+    <!-- Google AdSense -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4896673999031703"
+    crossorigin="anonymous"></script>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Cairo', sans-serif; background-color: #f1f5f9; }
+        .modal-backdrop { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.3); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); display: flex; justify-content: center; align-items: center; z-index: 50; transition: opacity 0.3s ease-in-out; }
+        .modal-backdrop.hidden { opacity: 0; pointer-events: none; }
+        .rtl-input::placeholder { text-align: right; }
+        .progress-bar-fill { transition: width 0.3s ease-in-out; }
+        select {
+            -webkit-appearance: none; -moz-appearance: none; appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: left 0.5rem center; background-repeat: no-repeat; background-size: 1.5em 1.5em; padding-left: 2.5rem;
+        }
+        .loader {
+            border: 5px solid #f3f3f3; border-radius: 50%; border-top: 5px solid #3498db;
+            width: 50px; height: 50px; animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        button:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body class="bg-slate-100 flex flex-col min-h-screen">
+    <!-- Loader -->
+    <div id="loader-overlay" class="modal-backdrop"><div class="loader"></div></div>
+
+    <!-- Modals -->
+    <div id="login-modal" class="modal-backdrop hidden">
+        <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-sm text-center">
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">دخول المسؤول</h1>
+            <p class="text-gray-500 mb-6">الرجاء تسجيل الدخول بحساب Google الخاص بالمسؤول.</p>
+            <button id="google-login-btn" class="w-full flex items-center justify-center gap-3 bg-white border border-gray-300 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-50 transition">
+                <svg class="w-6 h-6" viewBox="0 0 48 48"><defs><path id="a" d="M44.5 20H24v8.5h11.8C34.7 33.9 30.1 37 24 37c-7.2 0-13-5.8-13-13s5.8-13 13-13c3.1 0 5.9 1.1 8.1 2.9l6.4-6.4C34.6 4.1 29.6 2 24 2 11.8 2 2 11.8 2 24s9.8 22 22 22c11 0 21-8 21-22 0-1.3-.2-2.7-.5-4z"/></defs><clipPath id="b"><use xlink:href="#a" overflow="visible"/></clipPath><path clip-path="url(#b)" fill="#FBBC05" d="M0 37V11l17 13z"/><path clip-path="url(#b)" fill="#EA4335" d="M0 11l17 13 7-6.1L48 14V0H0z"/><path clip-path="url(#b)" fill="#34A853" d="M0 37l30-23.1 7.9 5.2L48 37H0z"/><path clip-path="url(#b)" fill="#4285F4" d="M48 48L17 24l-4-3 35-10z"/></svg>
+                <span>تسجيل الدخول باستخدام Google</span>
+            </button>
+            <button type="button" id="cancel-login-btn" class="w-full mt-4 bg-gray-200 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-300 transition">إلغاء</button>
+            <p id="login-error" class="text-red-500 mt-4 text-sm hidden">هذا الحساب غير مصرح له بالدخول.</p>
+        </div>
+    </div>
+        
+    <div id="app-screen" class="hidden flex-grow flex-col">
+        <header class="bg-white shadow-md sticky top-0 z-40">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center flex-wrap gap-4">
+                <div class="flex items-center gap-3">
+                    <img src="logo1.png" alt="Logo" class="h-12">
+                    <h1 class="text-2xl font-bold text-gray-800">نظام تسجيل التخصصات</h1>
+                </div>
+                <div id="header-buttons" class="flex items-center gap-3">
+                    <button id="query-reg-btn" class="bg-indigo-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-indigo-700 transition">الاستعلام عن التسجيل</button>
+                    <button id="admin-login-btn" class="bg-gray-800 text-white px-6 py-2 rounded-lg font-semibold hover:bg-gray-900 transition">دخول المسؤول</button>
+                    <button id="export-excel-btn" class="bg-green-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-green-700 transition flex items-center gap-2 hidden">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                        <span>تصدير</span>
+                    </button>
+                    <button id="logout-btn" class="bg-red-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-red-700 transition hidden">خروج</button>
+                </div>
+            </div>
+        </header>
+        <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow">
+            <div class="bg-blue-100 border-t-4 border-blue-500 rounded-b text-blue-900 px-4 py-3 shadow-md mb-6" role="alert">
+                <div class="flex">
+                    <div class="py-1"><svg class="fill-current h-6 w-6 text-blue-500 mr-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M2.93 17.07A10 10 0 1 1 17.07 2.93 10 10 0 0 1 2.93 17.07zM9 11v4h2v-4H9zm0-4h2v2H9V7z"/></svg></div>
+                    <div>
+                        <p class="font-bold">ملاحظة هامة</p>
+                        <p class="text-sm">سيتم اختيار أول 30 طالبًا مسجلين في قائمة كل تخصص لأي زيارة علمية يتم تحديدها وتكون مناسبة لهذا التخصص.</p>
+                    </div>
+                </div>
+            </div>
+            <div id="specializations-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        </main>
+        <footer class="bg-gray-800 text-white text-center py-4">
+            <p>الموقع من تصميم نديم بدر ليدر ذكاء اصطناعي الفرقة التالتة</p>
+        </footer>
+    </div>
+
+    <div id="add-student-modal" class="modal-backdrop hidden">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg m-4">
+            <div class="p-6 border-b border-gray-200"><h2 id="modal-title" class="text-2xl font-bold text-gray-800">تسجيل طالب جديد</h2></div>
+            <form id="add-student-form" class="p-6" novalidate>
+                <input type="hidden" id="specialization-key">
+                <div id="specialization-selector-wrapper" class="sm:col-span-2 hidden mb-5">
+                    <label for="specialization-selector" class="block mb-2 text-sm font-medium text-gray-900">تغيير التخصص إلى:</label>
+                    <select id="specialization-selector" class="rtl-input w-full p-3 border border-gray-300 rounded-lg bg-white"></select>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <input required type="text" id="student-name" placeholder="اسم الطالب" class="rtl-input w-full p-3 border border-gray-300 rounded-lg">
+                    <input required type="tel" id="student-mobile" placeholder="رقم الموبايل" class="rtl-input w-full p-3 border border-gray-300 rounded-lg">
+                    <div class="sm:col-span-2 relative">
+                        <input required type="number" id="student-national-id" placeholder="الرقم القومي (14 رقم)" class="rtl-input w-full p-3 border border-gray-300 rounded-lg">
+                        <p id="national-id-error" class="text-red-500 text-xs mt-1 hidden">الرقم القومي يجب أن يتكون من 14 رقم.</p>
+                    </div>
+                    <select required id="student-year" class="rtl-input w-full p-3 border border-gray-300 rounded-lg bg-white">
+                        <option value="" disabled selected>اختر الفرقة الدراسية</option><option value="الأولى">الأولى</option><option value="الثانية">الثانية</option><option value="الثالثة">الثالثة</option><option value="الرابعة">الرابعة</option>
+                    </select>
+                </div>
+                <div class="mt-8 flex justify-end gap-3">
+                    <button type="button" id="cancel-add-btn" class="bg-gray-200 text-gray-700 px-6 py-2 rounded-lg font-semibold hover:bg-gray-300 transition">إلغاء</button>
+                    <button type="submit" id="form-submit-btn" class="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition">حفظ التسجيل</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <div id="view-students-modal" class="modal-backdrop hidden">
+         <div class="bg-white rounded-2xl shadow-xl w-full max-w-4xl m-4 flex flex-col" style="max-height: 90vh;">
+            <div class="p-6 border-b border-gray-200"><h2 id="view-modal-title" class="text-2xl font-bold text-gray-800">الطلاب المسجلون</h2></div>
+            <div class="p-6 overflow-y-auto"><div class="overflow-x-auto"><table class="min-w-full divide-y divide-gray-200"><thead class="bg-gray-50"><tr><th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">اسم الطالب</th><th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">الموبايل</th><th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">الرقم القومي</th><th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">الفرقة</th><th class="px-6 py-3"></th></tr></thead><tbody id="students-table-body" class="bg-white divide-y divide-gray-200"></tbody></table></div></div>
+            <div class="p-4 bg-gray-50 border-t border-gray-200 flex justify-end"><button type="button" id="close-view-btn" class="bg-gray-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-gray-700 transition">إغلاق</button></div>
+        </div>
+    </div>
+
+    <div id="student-query-modal" class="modal-backdrop hidden">
+        <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-lg">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">الاستعلام عن التسجيل</h2>
+            <div id="query-search-view">
+                <p class="text-gray-600 mb-4 text-center">أدخل رقمك القومي لعرض أو تعديل تسجيلك.</p>
+                <form id="student-query-form">
+                    <input type="number" id="query-national-id" placeholder="الرقم القومي (14 رقم)" class="w-full px-4 py-3 border border-gray-300 rounded-lg mb-4 text-center">
+                    <p id="query-id-error" class="text-red-500 text-xs mb-4 text-center hidden">الرقم القومي يجب أن يتكون من 14 رقم.</p>
+                    <div class="flex gap-3">
+                         <button type="button" id="cancel-query-btn" class="flex-1 bg-gray-200 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-300">إلغاء</button>
+                        <button type="submit" class="flex-1 bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700">بحث</button>
+                    </div>
+                </form>
+            </div>
+            <div id="query-result-view" class="hidden">
+                 <h3 class="text-xl font-bold text-gray-800 mb-4 text-center">بيانات تسجيلك الحالية</h3>
+                 <div id="query-result-details" class="space-y-3 mb-6 border-r-4 border-indigo-500 pr-4 text-right"></div>
+                 <div class="flex justify-center gap-4 flex-wrap">
+                    <button id="delete-reg-btn" class="bg-red-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-red-700">حذف التسجيل</button>
+                    <button id="edit-reg-btn" class="bg-yellow-500 text-white px-6 py-2 rounded-lg font-semibold hover:bg-yellow-600">تعديل التسجيل</button>
+                 </div>
+                 <button id="back-to-query-search" class="mt-4 text-sm text-indigo-600 hover:underline w-full text-center">بحث برقم آخر</button>
+            </div>
+             <p id="query-error" class="text-red-500 mt-4 text-sm hidden text-center">الرقم القومي غير مسجل.</p>
+        </div>
+    </div>
+
+    <div id="message-modal" class="modal-backdrop hidden">
+        <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-sm text-center">
+            <h2 id="message-modal-title" class="text-2xl font-bold text-gray-800 mb-4"></h2>
+            <p id="message-modal-body" class="text-gray-600 mb-6"></p>
+            <div id="message-modal-actions" class="flex justify-center gap-3"></div>
+        </div>
+    </div>
+
+<script type="module">
+    // --- Firebase SDKs ---
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, collection, onSnapshot, addDoc, getDocs, query, where, writeBatch, doc, deleteDoc, getDoc, serverTimestamp, orderBy, limit } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        // --- Firebase Initialization ---
+        const hardcodedFirebaseConfig = {
+            apiKey: "AIzaSyC-fNlQQHC4Fqbx2wIBoyPOm8o43PUhJrk",
+            authDomain: "ai-roadmap-nadeem.firebaseapp.com",
+            projectId: "ai-roadmap-nadeem",
+            storageBucket: "ai-roadmap-nadeem.appspot.com",
+            messagingSenderId: "882087451108",
+            appId: "1:882087451108:web:65fbb714732407d1768ff1"
+        };
+
+        const firebaseConfig = typeof __firebase_config !== 'undefined' 
+            ? JSON.parse(__firebase_config) 
+            : hardcodedFirebaseConfig;
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        // --- DOM Elements ---
+        const loaderOverlay = document.getElementById('loader-overlay');
+        const appScreen = document.getElementById('app-screen');
+        const loginModal = document.getElementById('login-modal');
+        const specializationsContainer = document.getElementById('specializations-container');
+        const addStudentModal = document.getElementById('add-student-modal');
+        const viewStudentsModal = document.getElementById('view-students-modal');
+        const messageModal = document.getElementById('message-modal');
+        const studentQueryModal = document.getElementById('student-query-modal');
+
+        // --- Buttons ---
+        const adminLoginBtn = document.getElementById('admin-login-btn');
+        const logoutBtn = document.getElementById('logout-btn');
+        const exportExcelBtn = document.getElementById('export-excel-btn');
+        const queryRegBtn = document.getElementById('query-reg-btn');
+        const googleLoginBtn = document.getElementById('google-login-btn');
+
+        // --- Forms & Inputs ---
+        const addStudentForm = document.getElementById('add-student-form');
+        const studentQueryForm = document.getElementById('student-query-form');
+        const queryNationalIdInput = document.getElementById('query-national-id');
+
+        // --- System Settings ---
+        const MAX_STUDENTS_PER_SPECIALIZATION = 30; // Limit set to 30 students
+        const SPECIALIZATIONS = {
+            'ai': 'ذكاء اصطناعي',
+            'cyber_security': 'امن سيبراني',
+            'data_science': 'علوم بيانات',
+            'mechatronics': 'ميكاترونكس',
+            'autotronics': 'اوتوترونكس',
+            'ready_garments': 'ملابس جاهزة',
+            'industrial_automation': 'التحكم في الاليات الصناعية'
+        };
+
+        // --- App State ---
+        let appData = {};
+        let isAdminLoggedIn = false;
+        
+        // --- UI Functions ---
+        const showLoader = () => loaderOverlay.classList.remove('hidden');
+        const hideLoader = () => loaderOverlay.classList.add('hidden');
+        
+        function showMessageModal(title, body, actions = null) {
+            document.getElementById('message-modal-title').textContent = title;
+            document.getElementById('message-modal-body').textContent = body;
+            const actionsContainer = document.getElementById('message-modal-actions');
+            actionsContainer.innerHTML = ''; 
+            if (actions && actions.length > 0) {
+                actions.forEach(action => {
+                    const button = document.createElement('button');
+                    button.textContent = action.text;
+                    button.className = action.class;
+                    if (action.callback) {
+                        button.onclick = action.callback;
+                    }
+                    actionsContainer.appendChild(button);
+                });
+            } else {
+                 actionsContainer.innerHTML = `<button class="bg-blue-600 text-white px-8 py-2 rounded-lg font-semibold hover:bg-blue-700 transition">حسنًا</button>`;
+                 actionsContainer.firstChild.onclick = () => messageModal.classList.add('hidden');
+            }
+            messageModal.classList.remove('hidden');
+        }
+
+        function renderSpecializations() {
+            specializationsContainer.innerHTML = '';
+            Object.entries(SPECIALIZATIONS).forEach(([key, name]) => {
+                const specData = appData[key] || { students: [], waitingList: [] };
+                const studentCount = specData.students.length;
+                const waitingCount = specData.waitingList.length;
+                const isFull = studentCount >= MAX_STUDENTS_PER_SPECIALIZATION;
+                const progressPercentage = (studentCount / MAX_STUDENTS_PER_SPECIALIZATION) * 100;
+
+                const adminButtons = isAdminLoggedIn ? `<button data-key="${key}" class="view-students-btn flex-1 bg-gray-100 text-gray-700 px-4 py-2 rounded-lg font-semibold hover:bg-gray-200">عرض</button>` : '';
+                const registerButtonText = isFull ? 'انضم لقائمة الانتظار' : 'تسجيل طالب';
+                const registerButtonColor = isFull ? 'bg-yellow-500 hover:bg-yellow-600' : 'bg-blue-600 hover:bg-blue-700';
+
+                const card = `
+                    <div class="bg-white rounded-xl shadow-lg p-6 flex flex-col">
+                        <h2 class="text-xl font-bold text-gray-800 mb-3">${name}</h2>
+                        <div class="flex-grow space-y-2">
+                            <div class="flex justify-between items-center text-sm text-gray-600">
+                                <span>العدد المسجل</span><span class="font-semibold text-gray-800">${studentCount} / ${MAX_STUDENTS_PER_SPECIALIZATION}</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2.5"><div class="bg-blue-600 h-2.5 rounded-full progress-bar-fill" style="width: ${progressPercentage}%"></div></div>
+                             ${waitingCount > 0 ? `<div class="text-sm text-yellow-600 text-center pt-1">يوجد ${waitingCount} في قائمة الانتظار</div>` : ''}
+                        </div>
+                        <div class="mt-6 pt-4 border-t border-gray-200 flex gap-3">
+                            ${adminButtons}
+                            <button data-key="${key}" class="add-student-btn flex-1 text-white px-4 py-2 rounded-lg font-semibold transition ${registerButtonColor}">${registerButtonText}</button>
+                        </div>
+                    </div>`;
+                specializationsContainer.innerHTML += card;
+            });
+            addEventListenersToButtons();
+        }
+
+        function addEventListenersToButtons() {
+            document.querySelectorAll('.add-student-btn').forEach(btn => btn.addEventListener('click', (e) => handleRegistrationClick(e.currentTarget.dataset.key)));
+            if (isAdminLoggedIn) {
+                document.querySelectorAll('.view-students-btn').forEach(btn => btn.addEventListener('click', (e) => handleViewStudentsClick(e.currentTarget.dataset.key)));
+            }
+        }
+        
+        function closeAllModals() {
+            document.querySelectorAll('.modal-backdrop').forEach(modal => modal.classList.add('hidden'));
+        }
+
+        // --- Firebase Functions ---
+        async function findStudentByNationalId(nationalId) {
+            for (const key of Object.keys(SPECIALIZATIONS)) {
+                for (const location of ['students', 'waitingList']) {
+                    const ref = collection(db, "specializations", key, location);
+                    const q = query(ref, where("nationalId", "==", nationalId));
+                    const snapshot = await getDocs(q);
+                    if (!snapshot.empty) {
+                        const doc = snapshot.docs[0];
+                        return { found: true, location, key, docId: doc.id, data: doc.data() };
+                    }
+                }
+            }
+            return { found: false };
+        }
+        
+        async function performDelete(key, docId, location) {
+            showLoader();
+            try {
+                const studentDocRef = doc(db, "specializations", key, location, docId);
+                await deleteDoc(studentDocRef);
+
+                if (location === 'students' && (appData[key]?.waitingList.length || 0) > 0) {
+                    const waitingListRef = collection(db, "specializations", key, "waitingList");
+                    const q = query(waitingListRef, orderBy("createdAt"), limit(1));
+                    const snapshot = await getDocs(q);
+                    if (!snapshot.empty) {
+                        const firstWaitingStudentDoc = snapshot.docs[0];
+                        const studentData = firstWaitingStudentDoc.data();
+                        
+                        const batch = writeBatch(db);
+                        const newStudentRef = doc(collection(db, "specializations", key, "students"));
+                        batch.set(newStudentRef, { name: studentData.name, mobile: studentData.mobile, nationalId: studentData.nationalId, year: studentData.year });
+                        batch.delete(firstWaitingStudentDoc.ref);
+                        await batch.commit();
+                        showMessageModal('تمت الترقية', `تم حذف الطالب وترقية طالب من قائمة الانتظار بنجاح.`);
+                    } else {
+                        showMessageModal('نجاح', 'تم حذف التسجيل بنجاح.');
+                    }
+                } else {
+                     showMessageModal('نجاح', 'تم حذف التسجيل بنجاح.');
+                }
+            } catch (error) {
+                console.error("Error deleting student:", error);
+                showMessageModal('خطأ', 'حدث خطأ أثناء الحذف.');
+            } finally {
+                hideLoader();
+                closeAllModals();
+            }
+        }
+
+        // --- Event Handlers ---
+        function updateUIAfterAuthStateChange(user) {
+            isAdminLoggedIn = !!(user && user.email); // Only true if it's a non-anonymous user (admin)
+            adminLoginBtn.classList.toggle('hidden', isAdminLoggedIn);
+            exportExcelBtn.classList.toggle('hidden', !isAdminLoggedIn);
+            logoutBtn.classList.toggle('hidden', !isAdminLoggedIn);
+            renderSpecializations();
+        }
+
+        function populateAndOpenRegistrationForm(key, studentInfo = null) {
+            addStudentForm.reset();
+            const modalTitle = document.getElementById('modal-title');
+            const submitBtn = document.getElementById('form-submit-btn');
+            const specializationSelectorWrapper = document.getElementById('specialization-selector-wrapper');
+            const specializationSelector = document.getElementById('specialization-selector');
+            const nationalIdInput = document.getElementById('student-national-id');
+            
+            document.getElementById('specialization-key').value = key;
+            nationalIdInput.onblur = null;
+
+            if (studentInfo && studentInfo.found) {
+                modalTitle.textContent = `تعديل التسجيل`;
+                submitBtn.textContent = 'تحديث التسجيل';
+                document.getElementById('student-name').value = studentInfo.data.name;
+                document.getElementById('student-mobile').value = studentInfo.data.mobile;
+                nationalIdInput.value = studentInfo.data.nationalId;
+                nationalIdInput.readOnly = true;
+                nationalIdInput.classList.add('bg-gray-100', 'cursor-not-allowed');
+                document.getElementById('student-year').value = studentInfo.data.year;
+                
+                specializationSelectorWrapper.classList.remove('hidden');
+                specializationSelector.innerHTML = '';
+                Object.entries(SPECIALIZATIONS).forEach(([specKey, specName]) => {
+                    const option = document.createElement('option');
+                    option.value = specKey;
+                    option.textContent = specName;
+                    if (specKey === studentInfo.key) {
+                        option.selected = true;
+                    }
+                    specializationSelector.appendChild(option);
+                });
+
+                showMessageModal('مرحباً بعودتك!', `لقد وجدنا تسجيلاً سابقاً لك. يمكنك تحديث بياناتك أو تغيير تخصصك الآن.`, [{
+                    text: 'حسنًا',
+                    class: 'bg-blue-600 text-white px-8 py-2 rounded-lg font-semibold hover:bg-blue-700 transition',
+                    callback: () => {
+                        document.getElementById('message-modal').classList.add('hidden');
+                    }
+                }]);
+
+            } else {
+                modalTitle.textContent = `تسجيل في تخصص: ${SPECIALIZATIONS[key]}`;
+                submitBtn.textContent = 'تسجيل';
+                specializationSelectorWrapper.classList.add('hidden');
+                nationalIdInput.readOnly = false;
+                nationalIdInput.classList.remove('bg-gray-100', 'cursor-not-allowed');
+            }
+            addStudentModal.classList.remove('hidden');
+        }
+
+        async function handleRegistrationClick(key) {
+            populateAndOpenRegistrationForm(key);
+            const nationalIdInput = document.getElementById('student-national-id');
+            nationalIdInput.onblur = async () => {
+                if (nationalIdInput.value.length !== 14 || nationalIdInput.readOnly) return;
+                showLoader();
+                try {
+                    const studentInfo = await findStudentByNationalId(nationalIdInput.value);
+                    if (studentInfo.found) {
+                       populateAndOpenRegistrationForm(key, studentInfo);
+                    }
+                } catch (error) {
+                    console.error("Error on blur search:", error);
+                    showMessageModal('خطأ', 'حدث خطأ أثناء البحث عن الرقم القومي.');
+                } finally {
+                    hideLoader();
+                }
+            };
+        }
+
+        async function handleRegistrationSubmit(e) {
+            e.preventDefault();
+            const submitBtn = document.getElementById('form-submit-btn');
+            submitBtn.disabled = true;
+
+            const nationalIdInput = document.getElementById('student-national-id');
+            if (nationalIdInput.value.length !== 14) {
+                document.getElementById('national-id-error').classList.remove('hidden');
+                submitBtn.disabled = false;
+                return;
+            }
+            document.getElementById('national-id-error').classList.add('hidden');
+            showLoader();
+
+            const specializationSelectorWrapper = document.getElementById('specialization-selector-wrapper');
+            let newSpecializationKey;
+            if (!specializationSelectorWrapper.classList.contains('hidden')) {
+                newSpecializationKey = document.getElementById('specialization-selector').value;
+            } else {
+                newSpecializationKey = document.getElementById('specialization-key').value;
+            }
+
+            const studentData = {
+                name: document.getElementById('student-name').value, 
+                mobile: document.getElementById('student-mobile').value,
+                nationalId: nationalIdInput.value, 
+                year: document.getElementById('student-year').value,
+                specialization: SPECIALIZATIONS[newSpecializationKey] // Store the full name of the specialization
+            };
+            
+            const existingStudent = await findStudentByNationalId(studentData.nationalId);
+            const batch = writeBatch(db);
+
+            try {
+                if (existingStudent.found) {
+                    const oldDocRef = doc(db, "specializations", existingStudent.key, existingStudent.location, existingStudent.docId);
+                    batch.delete(oldDocRef);
+                }
+
+                const isNewSpecializationFull = (appData[newSpecializationKey]?.students.length || 0) >= MAX_STUDENTS_PER_SPECIALIZATION;
+                const specializationRef = isNewSpecializationFull 
+                    ? collection(db, "specializations", newSpecializationKey, "waitingList") 
+                    : collection(db, "specializations", newSpecializationKey, "students");
+                
+                const newDocData = isNewSpecializationFull ? { ...studentData, createdAt: serverTimestamp() } : studentData;
+                batch.set(doc(specializationRef), newDocData);
+                
+                await batch.commit();
+                closeAllModals();
+                const message = isNewSpecializationFull ? `اكتمل العدد. تم وضعك في قائمة الانتظار.` : `تم تسجيلك بنجاح في تخصص "${SPECIALIZATIONS[newSpecializationKey]}".`;
+                showMessageModal(existingStudent.found ? 'تم تحديث التسجيل!' : 'تسجيل ناجح!', message);
+            } catch (error) {
+                console.error("Error during registration:", error);
+                showMessageModal('خطأ', 'حدث خطأ أثناء حفظ البيانات. الرجاء المحاولة مرة أخرى.');
+            } finally {
+                hideLoader();
+                submitBtn.disabled = false;
+                nationalIdInput.readOnly = false;
+                nationalIdInput.classList.remove('bg-gray-100', 'cursor-not-allowed');
+            }
+        }
+
+        function handleViewStudentsClick(key) {
+            const specData = appData[key] || { students: [], waitingList: [] };
+            const tableBody = document.getElementById('students-table-body');
+            document.getElementById('view-modal-title').textContent = `الطلاب المسجلون في: ${SPECIALIZATIONS[key]}`;
+            
+            let html = specData.students.map(student => `<tr>
+                                <td class="px-6 py-4">${student.name}</td><td class="px-6 py-4">${student.mobile}</td>
+                                <td class="px-6 py-4">${student.nationalId}</td><td class="px-6 py-4">${student.year}</td>
+                                <td class="px-6 py-4 text-left">
+                                    <button data-key="${key}" data-doc-id="${student.docId}" data-location="students" class="delete-student-btn text-red-500 hover:text-red-700">حذف</button>
+                                </td></tr>`).join('');
+
+             if (specData.waitingList.length > 0) {
+                  html += '<tr><td colspan="5" class="text-center py-4 bg-yellow-50 font-bold text-yellow-700">قائمة الانتظار</td></tr>';
+                  html += specData.waitingList.map(student => `<tr class="bg-yellow-50">
+                                <td class="px-6 py-4">${student.name}</td><td class="px-6 py-4">${student.mobile}</td>
+                                <td class="px-6 py-4">${student.nationalId}</td><td class="px-6 py-4">${student.year}</td>
+                                <td class="px-6 py-4 text-left">
+                                     <button data-key="${key}" data-doc-id="${student.docId}" data-location="waitingList" class="delete-student-btn text-red-500 hover:text-red-700">حذف</button>
+                                </td></tr>`).join('');
+            }
+            if (!html) html = '<tr><td colspan="5" class="text-center py-10 text-gray-500">لا يوجد طلاب مسجلون حالياً.</td></tr>';
+
+            tableBody.innerHTML = html;
+            viewStudentsModal.classList.remove('hidden');
+            document.querySelectorAll('.delete-student-btn').forEach(btn => btn.addEventListener('click', (e) => {
+                const { key, docId, location } = e.currentTarget.dataset;
+                showMessageModal('تأكيد الحذف', 'هل أنت متأكد من حذف هذا الطالب؟', [
+                    { text: 'إلغاء', class: 'flex-1 bg-gray-200 text-gray-800 px-6 py-2 rounded-lg font-semibold hover:bg-gray-300', callback: closeAllModals },
+                    { text: 'تأكيد الحذف', class: 'flex-1 bg-red-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-red-700', callback: () => performDelete(key, docId, location) }
+                ]);
+            }));
+        }
+
+        // --- Init & Data Listeners ---
+        function initializeDataListeners() {
+            Object.keys(SPECIALIZATIONS).forEach(key => {
+                onSnapshot(collection(db, "specializations", key, "students"), (snapshot) => {
+                    if (!appData[key]) appData[key] = { students: [], waitingList: [] };
+                    appData[key].students = snapshot.docs.map(doc => ({ ...doc.data(), docId: doc.id }));
+                    renderSpecializations();
+                });
+                onSnapshot(query(collection(db, "specializations", key, "waitingList"), orderBy("createdAt")), (snapshot) => {
+                     if (!appData[key]) appData[key] = { students: [], waitingList: [] };
+                    appData[key].waitingList = snapshot.docs.map(doc => ({ ...doc.data(), docId: doc.id }));
+                    renderSpecializations();
+                });
+            });
+        }
+
+        // --- Event Listeners Setup ---
+        adminLoginBtn.addEventListener('click', () => loginModal.classList.remove('hidden'));
+        document.getElementById('cancel-login-btn').addEventListener('click', () => loginModal.classList.add('hidden'));
+        logoutBtn.addEventListener('click', () => signOut(auth));
+        
+        googleLoginBtn.addEventListener('click', async () => {
+            const provider = new GoogleAuthProvider();
+            const loginError = document.getElementById('login-error');
+            loginError.classList.add('hidden');
+            try {
+                await signInWithPopup(auth, provider);
+                // onAuthStateChanged will handle the rest
+            } catch (error) {
+                console.error("Google Sign-In failed:", error);
+                loginError.textContent = 'فشل تسجيل الدخول باستخدام Google. حاول مرة أخرى.';
+                loginError.classList.remove('hidden');
+            }
+        });
+        
+        addStudentForm.addEventListener('submit', handleRegistrationSubmit);
+        document.getElementById('cancel-add-btn').addEventListener('click', closeAllModals);
+        document.getElementById('close-view-btn').addEventListener('click', closeAllModals);
+        
+        queryRegBtn.addEventListener('click', () => {
+            studentQueryModal.classList.remove('hidden');
+            document.getElementById('query-search-view').classList.remove('hidden');
+            document.getElementById('query-result-view').classList.add('hidden');
+            document.getElementById('query-error').classList.add('hidden');
+            studentQueryForm.reset();
+        });
+        document.getElementById('cancel-query-btn').addEventListener('click', closeAllModals);
+        document.getElementById('back-to-query-search').addEventListener('click', () => {
+             document.getElementById('query-search-view').classList.remove('hidden');
+            document.getElementById('query-result-view').classList.add('hidden');
+            document.getElementById('query-error').classList.add('hidden');
+            studentQueryForm.reset();
+        });
+
+        studentQueryForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const submitBtn = e.currentTarget.querySelector('button[type="submit"]');
+            submitBtn.disabled = true;
+
+            const idError = document.getElementById('query-id-error');
+            if (queryNationalIdInput.value.length !== 14) { 
+                idError.classList.remove('hidden');
+                submitBtn.disabled = false;
+                return; 
+            }
+            idError.classList.add('hidden');
+            
+            showLoader();
+            try {
+                const studentInfo = await findStudentByNationalId(queryNationalIdInput.value);
+                const searchView = document.getElementById('query-search-view');
+                const resultView = document.getElementById('query-result-view');
+                const errorMsg = document.getElementById('query-error');
+                
+                if(studentInfo.found) {
+                    searchView.classList.add('hidden');
+                    resultView.classList.remove('hidden');
+                    errorMsg.classList.add('hidden');
+                    const detailsContainer = document.getElementById('query-result-details');
+                    const status = studentInfo.location === 'students' ? 'مسجل' : 'قائمة الانتظار';
+                    detailsContainer.innerHTML = `
+                        <p><strong>الاسم:</strong> ${studentInfo.data.name}</p>
+                        <p><strong>التخصص:</strong> ${SPECIALIZATIONS[studentInfo.key]}</p>
+                        <p><strong>الحالة:</strong> <span class="${status === 'مسجل' ? 'text-green-600' : 'text-yellow-600'} font-semibold">${status}</span></p>
+                    `;
+                    const editBtn = document.getElementById('edit-reg-btn');
+                    const deleteBtn = document.getElementById('delete-reg-btn');
+                    
+                    editBtn.onclick = () => {
+                        closeAllModals();
+                        populateAndOpenRegistrationForm(studentInfo.key, studentInfo);
+                    };
+                    deleteBtn.onclick = () => {
+                        showMessageModal('تأكيد الحذف', 'هل أنت متأكد من حذف تسجيلك؟', [
+                             { text: 'إلغاء', class: 'flex-1 bg-gray-200 text-gray-800 px-6 py-2 rounded-lg font-semibold hover:bg-gray-300', callback: closeAllModals },
+                             { text: 'تأكيد الحذف', class: 'flex-1 bg-red-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-red-700', callback: () => performDelete(studentInfo.key, studentInfo.docId, studentInfo.location) }
+                        ]);
+                    };
+
+                } else {
+                    errorMsg.classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error("Error during query search:", error);
+                showMessageModal('خطأ', 'حدث خطأ أثناء البحث. الرجاء المحاولة مرة أخرى.');
+            } finally {
+                hideLoader();
+                submitBtn.disabled = false;
+            }
+        });
+
+        exportExcelBtn.addEventListener('click', () => {
+             let allStudentsData = [];
+             Object.entries(SPECIALIZATIONS).forEach(([key, name]) => {
+                  appData[key]?.students.forEach(s => allStudentsData.push({ 'الحالة': 'مسجل', 'التخصص': name, 'اسم الطالب': s.name, 'الموبايل': s.mobile, 'الرقم القومي': s.nationalId, 'الفرقة': s.year }));
+                  appData[key]?.waitingList.forEach(s => allStudentsData.push({ 'الحالة': 'قائمة الانتظار', 'التخصص': name, 'اسم الطالب': s.name, 'الموبايل': s.mobile, 'الرقم القومي': s.nationalId, 'الفرقة': s.year }));
+             });
+             if (allStudentsData.length === 0) { showMessageModal('تنبيه', 'لا يوجد بيانات لتصديرها.'); return; }
+             const worksheet = XLSX.utils.json_to_sheet(allStudentsData);
+             const workbook = XLSX.utils.book_new();
+             XLSX.utils.book_append_sheet(workbook, worksheet, 'بيانات الطلاب');
+             worksheet['!cols'] = [ { wch: 15 }, { wch: 30 }, { wch: 25 }, { wch: 15 }, { wch: 20 }, { wch: 15 }];
+             XLSX.writeFile(workbook, 'كشف_تسجيل_التخصصات.xlsx');
+        });
+
+        // --- App Start Logic ---
+        onAuthStateChanged(auth, (user) => {
+            if (user) { 
+                // A user is signed in (either admin or anonymous student)
+                if (user.email && user.email.toLowerCase() !== 'nadembadrs2@gmail.com') {
+                    signOut(auth); // This re-triggers onAuthStateChanged with null
+                    document.getElementById('login-modal').classList.remove('hidden');
+                    document.getElementById('login-error').classList.remove('hidden');
+                    return; 
+                }
+
+                appScreen.classList.remove('hidden');
+                appScreen.classList.add('flex');
+                loginModal.classList.add('hidden');
+                
+                updateUIAfterAuthStateChange(user);
+            
+                if (!appScreen.classList.contains('initialized')) {
+                    initializeDataListeners();
+                    appScreen.classList.add('initialized');
+                }
+                hideLoader();
+
+            } else { 
+                // No user is signed in (on first load or after admin signs out)
+                // Automatically sign in anonymously to enter student mode.
+                showLoader();
+                signInAnonymously(auth).catch(error => {
+                     console.error("Automatic anonymous sign-in failed:", error);
+                     hideLoader();
+                     showMessageModal('خطأ فادح', 'لا يمكن الاتصال بالخادم. يرجى تحديث الصفحة.');
+                });
+            }
+        });
+
+    });
+</script>
+
+</body>
+</html>
+
+

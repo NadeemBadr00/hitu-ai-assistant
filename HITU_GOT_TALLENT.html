@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- FINALIZED: Content Security Policy -->
+    <meta http-equiv="Content-Security-Policy" content="
+        default-src 'none'; 
+        script-src 'self' https://www.googletagmanager.com https://pagead2.googlesyndication.com https://cdn.tailwindcss.com https://cdnjs.cloudflare.com 'sha256-1iu4tNLcrNxb8BDSZ6k2T25tJtFKwfI5pwQhyybh3Ww=' 'sha256-rYiEcb8NAe5Fr0h2saqT4JTO7g0xwnBPxmXalUMzgKk=';
+        style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+        img-src 'self' https://ai4roadmap.com data:;
+        font-src https://fonts.gstatic.com;
+        connect-src 'self' wss://*.firebaseio.com https://*.googleapis.com https://securetoken.googleapis.com https://www.google-analytics.com;
+        frame-src 'self' https://*.google.com https://ai-roadmap-nadeem.firebaseapp.com https://googleads.g.doubleclick.net;
+        object-src 'none';
+        base-uri 'self';
+        form-action 'self';
+    ">
+
+    <title>HITU GOT TALENT</title>
+
+    <!-- Favicon and Social Media Meta Tags -->
+    <link rel="icon" href="https://ai4roadmap.com/logo.png" type="image/png">
+    
+    <meta name="description" content="نظام تسجيل للمشاركة في مسابقة HITU GOT TALENT للتمثيل.">
+    <meta name="keywords" content="HITU GOT TALENT, تسجيل المواهب, تمثيل, جامعة حلوان التكنولوجية">
+    
+    <!-- Open Graph / Facebook / WhatsApp -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://ai4roadmap.com/">
+    <meta property="og:title" content="HITU GOT TALENT | التسجيل مفتوح الآن">
+    <meta property="og:description" content="نظام تسجيل للمشاركة في مسابقة HITU GOT TALENT للتمثيل.">
+    <meta property="og:image" content="https://ai4roadmap.com/logo.png">
+    <meta property="og:image:width" content="512">
+    <meta property="og:image:height" content="512">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://ai4roadmap.com/">
+    <meta property="twitter:title" content="HITU GOT TALENT | التسجيل مفتوح الآن">
+    <meta property="twitter:description" content="نظام تسجيل للمشاركة في مسابقة HITU GOT TALENT للتمثيل.">
+    <meta property="twitter:image" content="https://ai4roadmap.com/logo.png">
+
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-4TENK8FGB1"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-4TENK8FGB1');
+        </script>
+
+
+    <!-- Google AdSense -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4896673999031703"
+     crossorigin="anonymous"></script>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Cairo', sans-serif; background-color: #f1f5f9; }
+        .modal-backdrop { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.3); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); display: flex; justify-content: center; align-items: center; z-index: 50; transition: opacity 0.3s ease-in-out; }
+        .modal-backdrop.hidden { opacity: 0; pointer-events: none; }
+        .rtl-input::placeholder { text-align: right; }
+        select {
+            -webkit-appearance: none; -moz-appearance: none; appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: left 0.5rem center; background-repeat: no-repeat; background-size: 1.5em 1.5em; padding-left: 2.5rem;
+        }
+        .loader {
+            border: 5px solid #f3f3f3; border-radius: 50%; border-top: 5px solid #3498db;
+            width: 50px; height: 50px; animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        button:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body class="bg-slate-100 flex flex-col min-h-screen">
+    <!-- Loader -->
+    <div id="loader-overlay" class="modal-backdrop"><div class="loader"></div></div>
+
+    <!-- Modals -->
+    <div id="login-modal" class="modal-backdrop hidden">
+        <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-sm text-center">
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">دخول المسؤول</h1>
+            <p class="text-gray-500 mb-6">الرجاء تسجيل الدخول بحساب Google الخاص بالمسؤول.</p>
+            <button id="google-login-btn" class="w-full flex items-center justify-center gap-3 bg-white border border-gray-300 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-50 transition">
+                <svg class="w-6 h-6" viewBox="0 0 48 48"><defs><path id="a" d="M44.5 20H24v8.5h11.8C34.7 33.9 30.1 37 24 37c-7.2 0-13-5.8-13-13s5.8-13 13-13c3.1 0 5.9 1.1 8.1 2.9l6.4-6.4C34.6 4.1 29.6 2 24 2 11.8 2 2 11.8 2 24s9.8 22 22 22c11 0 21-8 21-22 0-1.3-.2-2.7-.5-4z"/></defs><clipPath id="b"><use xlink:href="#a" overflow="visible"/></clipPath><path clip-path="url(#b)" fill="#FBBC05" d="M0 37V11l17 13z"/><path clip-path="url(#b)" fill="#EA4335" d="M0 11l17 13 7-6.1L48 14V0H0z"/><path clip-path="url(#b)" fill="#34A853" d="M0 37l30-23.1 7.9 5.2L48 37H0z"/><path clip-path="url(#b)" fill="#4285F4" d="M48 48L17 24l-4-3 35-10z"/></svg>
+                <span>تسجيل الدخول باستخدام Google</span>
+            </button>
+            <button type="button" id="cancel-login-btn" class="w-full mt-4 bg-gray-200 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-300 transition">إلغاء</button>
+            <p id="login-error" class="text-red-500 mt-4 text-sm hidden">هذا الحساب غير مصرح له بالدخول.</p>
+        </div>
+    </div>
+        
+    <div id="app-screen" class="hidden flex-grow flex-col">
+        <header class="bg-white shadow-md sticky top-0 z-40">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center flex-wrap gap-4">
+                <div class="flex items-center gap-3">
+                    <img src="logo.png" alt="Logo" class="h-12">
+                    <h1 class="text-xl sm:text-2xl font-bold text-gray-800">HITU GOT TALENT</h1>
+                </div>
+                <div id="header-buttons" class="flex items-center gap-2 sm:gap-3">
+                    <button id="query-reg-btn" class="bg-indigo-600 text-white px-4 sm:px-6 py-2 rounded-lg font-semibold hover:bg-indigo-700 transition text-sm sm:text-base">الاستعلام</button>
+                    <button id="admin-login-btn" class="bg-gray-800 text-white px-4 sm:px-6 py-2 rounded-lg font-semibold hover:bg-gray-900 transition text-sm sm:text-base">المسؤول</button>
+                    <button id="export-excel-btn" class="bg-green-600 text-white px-4 sm:px-6 py-2 rounded-lg font-semibold hover:bg-green-700 transition flex items-center gap-2 hidden text-sm sm:text-base">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                        <span>تصدير</span>
+                    </button>
+                    <button id="logout-btn" class="bg-red-600 text-white px-4 sm:px-6 py-2 rounded-lg font-semibold hover:bg-red-700 transition hidden text-sm sm:text-base">خروج</button>
+                </div>
+            </div>
+        </header>
+        <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow">
+            <div class="bg-indigo-600 text-white p-4 rounded-lg mb-8 text-center shadow-lg">
+                <h3 class="font-bold text-xl mb-2">📢 تنبيه هام</h3>
+                <p>ستقام الاختبارات يوم الخميس الموافق 16 أكتوبر، من الساعة 9 صباحًا حتى الساعة 3 عصرًا.</p>
+            </div>
+            <div id="destinations-container" class="max-w-2xl mx-auto"></div>
+        </main>
+        <footer class="bg-gray-800 text-white text-center">
+            <div class="container mx-auto px-4 py-8">
+                <p class="font-bold text-xl mb-6">تحت إشراف</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 text-gray-300 text-center sm:text-right">
+                    <div class="space-y-2">
+                        <h4 class="font-semibold text-white text-lg mb-3 border-b-2 border-indigo-400 pb-2 inline-block">اتحاد الطلاب ورعاية الشباب</h4>
+                        <p><span class="font-semibold text-gray-100">رئيس الاتحاد:</span> محمد عمرو</p>
+                        <p><span class="font-semibold text-gray-100">نائب رئيس الاتحاد:</span> محمود خلف</p>
+                        <p>رعاية الشباب</p>
+                    </div>
+                    <div class="space-y-2">
+                        <h4 class="font-semibold text-white text-lg mb-3 border-b-2 border-indigo-400 pb-2 inline-block">اللجنة الفنية</h4>
+                        <p>يوسف هشام وليم</p>
+                        <p>هاجر</p>
+                    </div>
+                    <div class="space-y-2">
+                        <h4 class="font-semibold text-white text-lg mb-3 border-b-2 border-indigo-400 pb-2 inline-block">اللجنة العلمية</h4>
+                        <p>نديم محمد بدر</p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-gray-900 py-4 mt-6">
+                <div class="container mx-auto px-4">
+                    <p class="text-gray-400 text-sm">الموقع من تصميم نديم بدر ليدر ذكاء اصطناعي الفرقة التالتة</p>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <div id="add-student-modal" class="modal-backdrop hidden">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg m-4">
+            <div class="p-6 border-b border-gray-200"><h2 id="modal-title" class="text-2xl font-bold text-gray-800">تسجيل موهبة جديدة</h2></div>
+            <form id="add-student-form" class="p-6" novalidate>
+                <input type="hidden" id="destination-key">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <input required type="text" id="student-name" placeholder="الاسم" class="rtl-input w-full p-3 border border-gray-300 rounded-lg">
+                    <div class="sm:col-span-2 relative">
+                        <input required type="tel" id="student-mobile" placeholder="رقم الموبايل (للاستعلام)" class="rtl-input w-full p-3 border border-gray-300 rounded-lg">
+                        <p id="mobile-error" class="text-red-500 text-xs mt-1 hidden">رقم الموبايل غير صحيح.</p>
+                    </div>
+                    <select required id="student-year" class="rtl-input w-full p-3 border border-gray-300 rounded-lg bg-white">
+                        <option value="" disabled selected>اختر الفرقة الدراسية</option><option value="الأولى">الأولى</option><option value="الثانية">الثانية</option><option value="الثالثة">الثالثة</option><option value="الرابعة">الرابعة</option>
+                    </select>
+                    <select required id="student-specialization" class="rtl-input w-full p-3 border border-gray-300 rounded-lg bg-white">
+                        <option value="" disabled selected>اختر التخصص</option><option value="ذكاء اصطناعي">ذكاء اصطناعي</option><option value="امن سيبراني">امن سيبراني</option><option value="علوم بيانات">علوم بيانات</option><option value="ميكاترونكس">ميكاترونكس</option><option value="اوتوترونكس">اوتوترونكس</option><option value="ملابس جاهزة">ملابس جاهزة</option><option value="التحكم في الاليات الصناعية">التحكم في الاليات الصناعية</option>
+                    </select>
+                </div>
+                <div class="mt-8 flex justify-end gap-3">
+                    <button type="button" id="cancel-add-btn" class="bg-gray-200 text-gray-700 px-6 py-2 rounded-lg font-semibold hover:bg-gray-300 transition">إلغاء</button>
+                    <button type="submit" id="form-submit-btn" class="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition">حفظ التسجيل</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <div id="view-students-modal" class="modal-backdrop hidden">
+         <div class="bg-white rounded-2xl shadow-xl w-full max-w-4xl m-4 flex flex-col" style="max-height: 90vh;">
+            <div class="p-6 border-b border-gray-200"><h2 id="view-modal-title" class="text-2xl font-bold text-gray-800">المواهب المسجلة</h2></div>
+            <div class="p-6 overflow-y-auto"><div class="overflow-x-auto"><table class="min-w-full divide-y divide-gray-200"><thead class="bg-gray-50"><tr><th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">الاسم</th><th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">الموبايل</th><th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">الفرقة</th><th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">التخصص</th><th class="px-6 py-3"></th></tr></thead><tbody id="students-table-body" class="bg-white divide-y divide-gray-200"></tbody></table></div></div>
+            <div class="p-4 bg-gray-50 border-t border-gray-200 flex justify-end"><button type="button" id="close-view-btn" class="bg-gray-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-gray-700 transition">إغلاق</button></div>
+        </div>
+    </div>
+
+    <div id="student-query-modal" class="modal-backdrop hidden">
+        <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-lg">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">الاستعلام عن التسجيل</h2>
+            <div id="query-search-view">
+                <p class="text-gray-600 mb-4 text-center">أدخل رقم موبايلك لعرض أو تعديل تسجيلك.</p>
+                <form id="student-query-form">
+                    <input type="tel" id="query-mobile" placeholder="رقم الموبايل" class="w-full px-4 py-3 border border-gray-300 rounded-lg mb-4 text-center">
+                    <p id="query-mobile-error" class="text-red-500 text-xs mb-4 text-center hidden">رقم الموبايل المدخل غير صحيح.</p>
+                    <div class="flex gap-3">
+                         <button type="button" id="cancel-query-btn" class="flex-1 bg-gray-200 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-300">إلغاء</button>
+                        <button type="submit" class="flex-1 bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700">بحث</button>
+                    </div>
+                </form>
+            </div>
+            <div id="query-result-view" class="hidden">
+                 <h3 class="text-xl font-bold text-gray-800 mb-4 text-center">بيانات تسجيلك الحالية</h3>
+                 <div id="query-result-details" class="space-y-3 mb-6 border-r-4 border-indigo-500 pr-4 text-right"></div>
+                 <div class="flex justify-center gap-4 flex-wrap">
+                    <button id="delete-reg-btn" class="bg-red-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-red-700">حذف التسجيل</button>
+                    <button id="edit-reg-btn" class="bg-yellow-500 text-white px-6 py-2 rounded-lg font-semibold hover:bg-yellow-600">تعديل التسجيل</button>
+                 </div>
+                 <button id="back-to-query-search" class="mt-4 text-sm text-indigo-600 hover:underline w-full text-center">بحث برقم آخر</button>
+            </div>
+             <p id="query-error" class="text-red-500 mt-4 text-sm hidden text-center">رقم الموبايل غير مسجل.</p>
+        </div>
+    </div>
+
+    <div id="message-modal" class="modal-backdrop hidden">
+        <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-sm text-center">
+            <h2 id="message-modal-title" class="text-2xl font-bold text-gray-800 mb-4"></h2>
+            <p id="message-modal-body" class="text-gray-600 mb-6"></p>
+            <div id="message-modal-actions" class="flex justify-center gap-3"></div>
+        </div>
+    </div>
+    
+    <!-- Firebase SDKs -->
+    <script src="/__/firebase/8.10.1/firebase-app.js"></script>
+    <script src="/__/firebase/8.10.1/firebase-auth.js"></script>
+    <script src="/__/firebase/8.10.1/firebase-firestore.js"></script>
+    <script src="/__/firebase/init.js"></script>
+
+<script type="module">
+    document.addEventListener('DOMContentLoaded', async () => {
+        // --- Firebase Initialization (Compat SDK) ---
+        // FIX: The /__/firebase/init.js script automatically initializes the app.
+        // We no longer need to call firebase.initializeApp(firebaseConfig).
+        const db = firebase.firestore();
+        const auth = firebase.auth();
+        const GoogleAuthProvider = firebase.auth.GoogleAuthProvider;
+
+        // --- DOM Elements ---
+        const loaderOverlay = document.getElementById('loader-overlay');
+        const appScreen = document.getElementById('app-screen');
+        const loginModal = document.getElementById('login-modal');
+        const destinationsContainer = document.getElementById('destinations-container');
+        const addStudentModal = document.getElementById('add-student-modal');
+        const viewStudentsModal = document.getElementById('view-students-modal');
+        const messageModal = document.getElementById('message-modal');
+        const studentQueryModal = document.getElementById('student-query-modal');
+
+        // --- Buttons ---
+        const adminLoginBtn = document.getElementById('admin-login-btn');
+        const logoutBtn = document.getElementById('logout-btn');
+        const exportExcelBtn = document.getElementById('export-excel-btn');
+        const queryRegBtn = document.getElementById('query-reg-btn');
+        const googleLoginBtn = document.getElementById('google-login-btn');
+
+        // --- Forms & Inputs ---
+        const addStudentForm = document.getElementById('add-student-form');
+        const studentQueryForm = document.getElementById('student-query-form');
+        const queryMobileInput = document.getElementById('query-mobile');
+
+        // --- System Settings ---
+        const DESTINATIONS = { 'acting': 'تمثيل' };
+
+        // --- App State ---
+        let appData = {};
+        let isAdminLoggedIn = false;
+        
+        // --- UI Functions ---
+        const showLoader = () => loaderOverlay.classList.remove('hidden');
+        const hideLoader = () => loaderOverlay.classList.add('hidden');
+        
+        function showMessageModal(title, body, actions = null) {
+            document.getElementById('message-modal-title').textContent = title;
+            document.getElementById('message-modal-body').textContent = body;
+            const actionsContainer = document.getElementById('message-modal-actions');
+            actionsContainer.innerHTML = ''; 
+            if (actions && actions.length > 0) {
+                actions.forEach(action => {
+                    const button = document.createElement('button');
+                    button.textContent = action.text;
+                    button.className = action.class;
+                    if (action.callback) {
+                        button.onclick = action.callback;
+                    }
+                    actionsContainer.appendChild(button);
+                });
+            } else {
+                 actionsContainer.innerHTML = `<button class="bg-blue-600 text-white px-8 py-2 rounded-lg font-semibold hover:bg-blue-700 transition">حسنًا</button>`;
+                 actionsContainer.firstChild.onclick = () => messageModal.classList.add('hidden');
+            }
+            messageModal.classList.remove('hidden');
+        }
+
+        function renderDestinations() {
+            destinationsContainer.innerHTML = '';
+            Object.entries(DESTINATIONS).forEach(([key, name]) => {
+                const destData = appData[key] || { students: [] };
+                const studentCount = isAdminLoggedIn ? destData.students.length : '?';
+                const icon = '🎭';
+                const adminButtons = isAdminLoggedIn ? `<button data-key="${key}" class="view-students-btn flex-1 bg-gray-100 text-gray-700 px-4 py-2 rounded-lg font-semibold hover:bg-gray-200">عرض</button>` : '';
+                const card = `
+                    <div class="bg-white rounded-xl shadow-lg p-6 flex flex-col">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-3 flex items-center gap-3 justify-center"><span class="text-4xl">${icon}</span> ${name}</h2>
+                        <div class="flex-grow space-y-2">
+                            <div class="flex justify-center items-center text-lg text-gray-600 py-4">
+                                <span>عدد المتقدمين:</span><span class="font-bold text-gray-800 mr-2 text-2xl">${studentCount}</span>
+                            </div>
+                        </div>
+                        <div class="mt-6 pt-4 border-t border-gray-200 flex gap-3">
+                            ${adminButtons}
+                            <button data-key="${key}" class="add-student-btn flex-1 text-white px-4 py-2 rounded-lg font-semibold transition bg-blue-600 hover:bg-blue-700">تسجيل موهبة</button>
+                        </div>
+                    </div>`;
+                destinationsContainer.innerHTML += card;
+            });
+            addEventListenersToButtons();
+        }
+
+        function addEventListenersToButtons() {
+            document.querySelectorAll('.add-student-btn').forEach(btn => btn.addEventListener('click', (e) => handleRegistrationClick(e.currentTarget.dataset.key)));
+            if (isAdminLoggedIn) {
+                document.querySelectorAll('.view-students-btn').forEach(btn => btn.addEventListener('click', (e) => handleViewStudentsClick(e.currentTarget.dataset.key)));
+            }
+        }
+        
+        function closeAllModals() {
+            document.querySelectorAll('.modal-backdrop').forEach(modal => modal.classList.add('hidden'));
+        }
+
+        // --- Firebase Functions ---
+        async function findStudentByMobile(mobile) {
+            for (const key of Object.keys(DESTINATIONS)) {
+                const ref = db.collection("destinations").doc(key).collection("students");
+                const snapshot = await ref.where("mobile", "==", mobile).get();
+                if (!snapshot.empty) {
+                    const doc = snapshot.docs[0];
+                    return { found: true, key, docId: doc.id, data: doc.data() };
+                }
+            }
+            return { found: false };
+        }
+        
+        async function performDelete(key, docId) {
+            showLoader();
+            try {
+                const studentDocRef = db.collection("destinations").doc(key).collection("students").doc(docId);
+                await studentDocRef.delete();
+                showMessageModal('نجاح', 'تم حذف التسجيل بنجاح.');
+            } catch (error) {
+                console.error("Error deleting student:", error);
+                showMessageModal('خطأ', 'حدث خطأ أثناء الحذف.');
+            } finally {
+                hideLoader();
+                closeAllModals();
+            }
+        }
+
+        // --- Event Handlers ---
+        function updateUIAfterAuthStateChange(user) {
+            isAdminLoggedIn = !!(user && !user.isAnonymous && user.email);
+            adminLoginBtn.classList.toggle('hidden', isAdminLoggedIn);
+            exportExcelBtn.classList.toggle('hidden', !isAdminLoggedIn);
+            logoutBtn.classList.toggle('hidden', !isAdminLoggedIn);
+            renderDestinations();
+        }
+
+        function populateAndOpenRegistrationForm(key, studentInfo = null) {
+            addStudentForm.reset();
+            const modalTitle = document.getElementById('modal-title');
+            const submitBtn = document.getElementById('form-submit-btn');
+            const mobileInput = document.getElementById('student-mobile');
+            
+            document.getElementById('destination-key').value = key;
+            mobileInput.onblur = null;
+
+            if (studentInfo && studentInfo.found) {
+                modalTitle.textContent = `تعديل التسجيل`;
+                submitBtn.textContent = 'تحديث التسجيل';
+                document.getElementById('student-name').value = studentInfo.data.name;
+                mobileInput.value = studentInfo.data.mobile;
+                mobileInput.readOnly = true;
+                mobileInput.classList.add('bg-gray-100', 'cursor-not-allowed');
+                document.getElementById('student-year').value = studentInfo.data.year;
+                document.getElementById('student-specialization').value = studentInfo.data.specialization;
+                
+                showMessageModal('مرحباً بعودتك!', `لقد وجدنا تسجيلاً سابقاً لك. يمكنك تحديث بياناتك الآن.`, [{
+                    text: 'حسنًا',
+                    class: 'bg-blue-600 text-white px-8 py-2 rounded-lg font-semibold hover:bg-blue-700 transition',
+                    callback: () => document.getElementById('message-modal').classList.add('hidden')
+                }]);
+
+            } else {
+                modalTitle.textContent = `التسجيل في: ${DESTINATIONS[key]}`;
+                submitBtn.textContent = 'تسجيل';
+                mobileInput.readOnly = false;
+                mobileInput.classList.remove('bg-gray-100', 'cursor-not-allowed');
+            }
+            addStudentModal.classList.remove('hidden');
+        }
+
+        async function handleRegistrationClick(key) {
+            populateAndOpenRegistrationForm(key);
+            const mobileInput = document.getElementById('student-mobile');
+            mobileInput.onblur = async () => {
+                const mobileRegex = /^01[0-2,5]{1}[0-9]{8}$/;
+                if (!mobileRegex.test(mobileInput.value) || mobileInput.readOnly) return;
+                showLoader();
+                try {
+                    if(isAdminLoggedIn) {
+                        const studentInfo = await findStudentByMobile(mobileInput.value);
+                        if (studentInfo.found) {
+                           populateAndOpenRegistrationForm(key, studentInfo);
+                        }
+                    }
+                } catch (error) {
+                    console.error("Error on blur search:", error);
+                    showMessageModal('خطأ', 'حدث خطأ أثناء البحث عن رقم الموبايل.');
+                } finally {
+                    hideLoader();
+                }
+            };
+        }
+
+        async function handleRegistrationSubmit(e) {
+            e.preventDefault();
+            const submitBtn = document.getElementById('form-submit-btn');
+            submitBtn.disabled = true;
+
+            const mobileInput = document.getElementById('student-mobile');
+            const mobileRegex = /^01[0-2,5]{1}[0-9]{8}$/;
+            if (!mobileRegex.test(mobileInput.value)) {
+                document.getElementById('mobile-error').classList.remove('hidden');
+                submitBtn.disabled = false;
+                return;
+            }
+            document.getElementById('mobile-error').classList.add('hidden');
+            showLoader();
+
+            const studentData = {
+                name: document.getElementById('student-name').value, 
+                mobile: mobileInput.value,
+                year: document.getElementById('student-year').value,
+                specialization: document.getElementById('student-specialization').value,
+            };
+
+            let newDestinationKey = document.getElementById('destination-key').value;
+            
+            try {
+                const batch = db.batch();
+                const existingStudent = await findStudentByMobile(studentData.mobile);
+
+                if (existingStudent.found) {
+                    if (!isAdminLoggedIn) {
+                         showMessageModal('خطأ في الصلاحية', 'لا يمكنك تعديل تسجيل موجود. يسمح فقط بالتسجيل الجديد أو للمسؤول بالتعديل.');
+                         return; // Exit if a normal user tries to update.
+                    }
+                    const oldDocRef = db.collection("destinations").doc(existingStudent.key).collection("students").doc(existingStudent.docId);
+                    batch.delete(oldDocRef);
+                }
+
+                const newDocRef = db.collection("destinations").doc(newDestinationKey).collection("students").doc();
+                batch.set(newDocRef, studentData);
+                
+                await batch.commit();
+
+                closeAllModals();
+                const message = `تم تسجيلك بنجاح في فئة "${DESTINATIONS[newDestinationKey]}".`;
+                showMessageModal(existingStudent.found ? 'تم تحديث التسجيل!' : 'تسجيل ناجح!', message);
+            } catch (error) {
+                console.error("Error during registration:", error);
+                showMessageModal('خطأ', 'حدث خطأ أثناء حفظ البيانات. الرجاء المحاولة مرة أخرى.');
+            } finally {
+                hideLoader();
+                submitBtn.disabled = false;
+                mobileInput.readOnly = false;
+                mobileInput.classList.remove('bg-gray-100', 'cursor-not-allowed');
+            }
+        }
+
+        function handleViewStudentsClick(key) {
+            const destData = appData[key] || { students: [] };
+            const tableBody = document.getElementById('students-table-body');
+            document.getElementById('view-modal-title').textContent = `المواهب المسجلة في: ${DESTINATIONS[key]}`;
+            
+            tableBody.innerHTML = ''; 
+
+            if (destData.students.length === 0) {
+                const row = tableBody.insertRow();
+                const cell = row.insertCell();
+                cell.colSpan = 5;
+                cell.textContent = 'لا يوجد مواهب مسجلة حالياً.';
+                cell.className = 'text-center py-10 text-gray-500';
+            } else {
+                destData.students.forEach(student => {
+                    const row = tableBody.insertRow();
+                    const nameCell = row.insertCell();
+                    nameCell.className = 'px-6 py-4';
+                    nameCell.textContent = student.name;
+                    const mobileCell = row.insertCell();
+                    mobileCell.className = 'px-6 py-4';
+                    mobileCell.textContent = student.mobile;
+                    const yearCell = row.insertCell();
+                    yearCell.className = 'px-6 py-4';
+                    yearCell.textContent = student.year;
+                    const specializationCell = row.insertCell();
+                    specializationCell.className = 'px-6 py-4';
+                    specializationCell.textContent = student.specialization;
+                    const actionsCell = row.insertCell();
+                    actionsCell.className = 'px-6 py-4 text-left';
+                    const deleteButton = document.createElement('button');
+                    deleteButton.dataset.key = key;
+                    deleteButton.dataset.docId = student.docId;
+                    deleteButton.className = 'delete-student-btn text-red-500 hover:text-red-700';
+                    deleteButton.textContent = 'حذف';
+                    actionsCell.appendChild(deleteButton);
+                });
+            }
+
+            viewStudentsModal.classList.remove('hidden');
+            
+            document.querySelectorAll('.delete-student-btn').forEach(btn => btn.addEventListener('click', (e) => {
+                const { key, docId } = e.currentTarget.dataset;
+                showMessageModal('تأكيد الحذف', 'هل أنت متأكد من حذف هذه الموهبة؟', [
+                    { text: 'إلغاء', class: 'flex-1 bg-gray-200 text-gray-800 px-6 py-2 rounded-lg font-semibold hover:bg-gray-300', callback: closeAllModals },
+                    { text: 'تأكيد الحذف', class: 'flex-1 bg-red-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-red-700', callback: () => performDelete(key, docId) }
+                ]);
+            }));
+        }
+
+        // --- Init & Data Listeners ---
+        function initializeDataListeners() {
+            Object.keys(DESTINATIONS).forEach(key => {
+                const studentsRef = db.collection("destinations").doc(key).collection("students");
+                studentsRef.onSnapshot((snapshot) => {
+                    if (!appData[key]) appData[key] = { students: [] };
+                    appData[key].students = snapshot.docs.map(doc => ({ ...doc.data(), docId: doc.id }));
+                    renderDestinations();
+                }, (error) => {
+                    if (error.code === 'permission-denied') { /* Expected for non-admins */ } 
+                    else { console.error(`Error listening to ${key} students:`, error); }
+                });
+            });
+        }
+
+        // --- Event Listeners Setup ---
+        adminLoginBtn.addEventListener('click', () => loginModal.classList.remove('hidden'));
+        document.getElementById('cancel-login-btn').addEventListener('click', () => loginModal.classList.add('hidden'));
+        logoutBtn.addEventListener('click', () => auth.signOut());
+        
+        googleLoginBtn.addEventListener('click', async () => {
+            const provider = new GoogleAuthProvider();
+            const loginError = document.getElementById('login-error');
+            loginError.classList.add('hidden');
+            try {
+                await auth.signInWithPopup(provider);
+            } catch (error) {
+                console.error("Google Sign-In failed:", error);
+                loginError.textContent = 'فشل تسجيل الدخول باستخدام Google. حاول مرة أخرى.';
+                loginError.classList.remove('hidden');
+            }
+        });
+        
+        addStudentForm.addEventListener('submit', handleRegistrationSubmit);
+        document.getElementById('cancel-add-btn').addEventListener('click', closeAllModals);
+        document.getElementById('close-view-btn').addEventListener('click', closeAllModals);
+        
+        queryRegBtn.addEventListener('click', () => {
+            studentQueryModal.classList.remove('hidden');
+            document.getElementById('query-search-view').classList.remove('hidden');
+            document.getElementById('query-result-view').classList.add('hidden');
+            document.getElementById('query-error').classList.add('hidden');
+            studentQueryForm.reset();
+        });
+        document.getElementById('cancel-query-btn').addEventListener('click', closeAllModals);
+        document.getElementById('back-to-query-search').addEventListener('click', () => {
+             document.getElementById('query-search-view').classList.remove('hidden');
+            document.getElementById('query-result-view').classList.add('hidden');
+            document.getElementById('query-error').classList.add('hidden');
+            studentQueryForm.reset();
+        });
+
+        studentQueryForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const submitBtn = e.currentTarget.querySelector('button[type="submit"]');
+            submitBtn.disabled = true;
+
+            const mobileRegex = /^01[0-2,5]{1}[0-9]{8}$/;
+            const idError = document.getElementById('query-mobile-error');
+            if (!mobileRegex.test(queryMobileInput.value)) { 
+                idError.classList.remove('hidden');
+                submitBtn.disabled = false;
+                return; 
+            }
+            idError.classList.add('hidden');
+            
+            showLoader();
+            try {
+                const studentInfo = await findStudentByMobile(queryMobileInput.value);
+                const searchView = document.getElementById('query-search-view');
+                const resultView = document.getElementById('query-result-view');
+                const errorMsg = document.getElementById('query-error');
+                
+                if(studentInfo.found) {
+                    searchView.classList.add('hidden');
+                    resultView.classList.remove('hidden');
+                    errorMsg.classList.add('hidden');
+                    const detailsContainer = document.getElementById('query-result-details');
+                    detailsContainer.innerHTML = ''; 
+                    const nameP = document.createElement('p');
+                    nameP.innerHTML = `<strong>الاسم:</strong> `;
+                    nameP.appendChild(document.createTextNode(studentInfo.data.name));
+                    const categoryP = document.createElement('p');
+                    categoryP.innerHTML = `<strong>فئة الموهبة:</strong> `;
+                    categoryP.appendChild(document.createTextNode(DESTINATIONS[studentInfo.key]));
+                    detailsContainer.appendChild(nameP);
+                    detailsContainer.appendChild(categoryP);
+                    
+                    document.getElementById('edit-reg-btn').onclick = () => {
+                        closeAllModals();
+                        populateAndOpenRegistrationForm(studentInfo.key, studentInfo);
+                    };
+                    document.getElementById('delete-reg-btn').onclick = () => {
+                        showMessageModal('تأكيد الحذف', 'هل أنت متأكد من حذف تسجيلك؟', [
+                             { text: 'إلغاء', class: 'flex-1 bg-gray-200 text-gray-800 px-6 py-2 rounded-lg font-semibold hover:bg-gray-300', callback: closeAllModals },
+                             { text: 'تأكيد الحذف', class: 'flex-1 bg-red-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-red-700', callback: () => performDelete(studentInfo.key, studentInfo.docId) }
+                        ]);
+                    };
+                } else {
+                    errorMsg.classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error("Error during query search:", error);
+                showMessageModal('خطأ', 'حدث خطأ أثناء البحث. تأكد من أن لديك صلاحيات المسؤول.');
+            } finally {
+                hideLoader();
+                submitBtn.disabled = false;
+            }
+        });
+
+        exportExcelBtn.addEventListener('click', () => {
+             let allStudentsData = [];
+             Object.entries(DESTINATIONS).forEach(([key, name]) => {
+                  appData[key]?.students.forEach(s => allStudentsData.push({ 'فئة الموهبة': name, 'الاسم': s.name, 'الموبايل': s.mobile, 'الفرقة': s.year, 'التخصص': s.specialization }));
+             });
+             if (allStudentsData.length === 0) { showMessageModal('تنبيه', 'لا يوجد بيانات لتصديرها.'); return; }
+             const worksheet = XLSX.utils.json_to_sheet(allStudentsData);
+             const workbook = XLSX.utils.book_new();
+             XLSX.utils.book_append_sheet(workbook, worksheet, 'بيانات المواهب');
+             worksheet['!cols'] = [ { wch: 20 }, { wch: 25 }, { wch: 15 }, { wch: 15 }, { wch: 20 }];
+             XLSX.writeFile(workbook, 'كشف_المواهب.xlsx');
+        });
+
+        // --- App Start Logic ---
+        auth.onAuthStateChanged((user) => {
+            if (user) { 
+                if (!user.isAnonymous && user.email && user.email.toLowerCase() !== 'nadembadrs2@gmail.com') {
+                    auth.signOut(); 
+                    document.getElementById('login-modal').classList.remove('hidden');
+                    document.getElementById('login-error').classList.remove('hidden');
+                    return; 
+                }
+                updateUIAfterAuthStateChange(user);
+                appScreen.classList.remove('hidden');
+                appScreen.classList.add('flex');
+                loginModal.classList.add('hidden');
+                if (!appScreen.classList.contains('initialized')) {
+                    if (isAdminLoggedIn) {
+                        initializeDataListeners();
+                    }
+                    appScreen.classList.add('initialized');
+                }
+                hideLoader();
+            } else { 
+                showLoader();
+                auth.signInAnonymously().catch(error => {
+                    console.error("Automatic anonymous sign-in failed:", error);
+                    hideLoader();
+                    showMessageModal('خطأ فادح', 'لا يمكن الاتصال بالخادم. يرجى تحديث الصفحة.');
+                });
+            }
+        });
+    });
+</script>
+
+</body>
+</html>
+

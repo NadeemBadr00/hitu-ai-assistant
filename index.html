@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>المساعد الذكي لجامعة حلوان التكنولوجية</title>
+
+    <!-- Favicon and Social Media Meta Tags -->
+    <link rel="icon" href="logo.png" type="image/png">
+    <meta name="description" content="المساعد الذكي لجامعة حلوان التكنولوجية، دليلك الشامل لكل ما يخص الجامعة والكلية، من معلومات عن الأقسام والجداول الدراسية إلى بيانات الإدارة والطلاب الأوائل.">
+    <meta name="keywords" content="المساعد الذكي, جامعة حلوان, نظام إدارة الجامعة, معلومات الأقسام, الجداول الدراسية, الطلاب الأوائل, AI, ذكاء اصطناعي, Chatbot, المساعد الذكي للطلاب">
+
+    <!-- Open Graph / Facebook / WhatsApp -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://ai4roadmap.com/">
+    <meta property="og:title" content="المساعد الذكي لجامعة حلوان التكنولوجية">
+    <meta property="og:description" content="دليلك الشامل لكل ما يخص الجامعة والكلية، مدعوم بالذكاء الاصطناعي.">
+    <meta property="og:image" content="https://ai4roadmap.com/logo.png">
+    <meta property="og:image:width" content="512">
+    <meta property="og:image:height" content="512">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://ai4roadmap.com/">
+    <meta property="twitter:title" content="المساعد الذكي لجامعة حلوان التكنولوجية">
+    <meta property="twitter:description" content="دليلك الشامل لكل ما يخص الجامعة والكلية، مدعوم بالذكاء الاصطناعي.">
+    <meta property="twitter:image" content="https://ai4roadmap.com/logo.png">
+
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-4TENK8FGB1"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-4TENK8FGB1');
+    </script>
+
+    <!-- Google AdSense -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4896673999031703"
+        crossorigin="anonymous"></script>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="main.css">
+    
+
+    <style>
+        .message-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 8px;
+            /* --- [تعديل] إظهار الأزرار بشكل دائم --- */
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* --- [تم الحذف] لم نعد بحاجة لإظهار الأزرار عند المرور فقط --- */
+        
+        .icon-action-btn {
+            background-color: #f0f4f9;
+            border: 1px solid #e2e8f0;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #4a5568;
+            cursor: pointer;
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+
+        .dark .icon-action-btn {
+            background-color: #2d3748;
+            border-color: #4a5568;
+            color: #e2e8f0;
+        }
+
+        .icon-action-btn:hover {
+            background-color: #e2e8f0;
+            color: #1a202c;
+        }
+
+        .dark .icon-action-btn:hover {
+            background-color: #4a5568;
+            color: #ffffff;
+        }
+
+        .icon-action-btn svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .icon-action-btn.loading .icon {
+            display: none;
+        }
+
+        .icon-action-btn .loader {
+            display: none;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .icon-action-btn.loading .loader {
+            display: block;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        #image-preview-container {
+            padding: 0 16px;
+            margin-bottom: 8px;
+        }
+
+        .preview-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+
+        .preview-image {
+            max-width: 100px;
+            max-height: 100px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .dark .preview-image {
+            border-color: #4a5568;
+        }
+
+        .remove-image-btn {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            line-height: 1;
+        }
+        
+        /* --- [ تصميم جديد للإحصائيات ] --- */
+        .stats-container {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .stat-item {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 6px 12px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #e2e8f0;
+            transition: background-color 0.2s ease;
+            cursor: default;
+        }
+
+        .stat-item:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .stat-item svg {
+            color: #94a3b8; /* A slightly dimmer color for the icon */
+        }
+
+        .stat-info {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            line-height: 1.2;
+        }
+
+        .stat-number {
+            font-weight: 700;
+            font-size: 1rem;
+            color: #ffffff;
+        }
+
+        .stat-label {
+            font-size: 0.7rem;
+            font-weight: 500;
+            color: #cbd5e1; /* Lighter text for the label */
+        }
+
+        /* --- [ تعديلات الهاتف ] --- */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-wrap: wrap;
+                justify-content: space-between;
+                align-items: center;
+                row-gap: 12px;
+            }
+
+            .stats-container {
+                /* Rules removed from here to allow flexible positioning */
+            }
+            
+            .header-right-controls {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+            }
+
+            .title h1 {
+                font-size: 1.05rem;
+            }
+            .title p {
+                font-size: 0.8rem;
+            }
+
+            #chat-container {
+                padding: 12px;
+            }
+
+            .msg-row {
+                gap: 8px;
+            }
+
+            .message-container {
+                max-width: 85%;
+            }
+
+            .bottom-container {
+                padding: 0 0.5rem 0.5rem;
+            }
+            
+            #suggestions-container {
+                padding: 8px 0;
+            }
+
+            .input-area {
+                padding: 4px;
+                gap: 8px;
+            }
+
+            .text-input {
+                padding: 8px 10px;
+                font-size: 0.95rem;
+            }
+
+            .send-btn {
+                font-size: 0;
+                width: 42px;
+                height: 42px;
+                flex-shrink: 0;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 8px;
+            }
+            .send-btn::before {
+                content: '';
+                display: block;
+                width: 20px;
+                height: 20px;
+                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cline x1='22' y1='2' x2='11' y2='13'/%3E%3Cpolygon points='22 2 15 22 11 13 2 9 22 2'/%3E%3C/svg%3E");
+                background-repeat: no-repeat;
+                background-position: center;
+            }
+
+            #upload-img-btn {
+                width: 42px;
+                height: 42px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container-card" id="app-card">
+        <div class="header">
+            <div class="header-content">
+                <div class="header-left">
+                    <img src="logo.png" alt="logo" class="logo" id="logo-img">
+                    <div class="title">
+                        <h1>المساعد الذكي لجامعة حلوان التكنولوجية</h1>
+                        <p>دليلك لكل ما يخص الجامعة والكلية</p>
+                    </div>
+                </div>
+
+                <div class="header-right-controls">
+                    <!-- حاوية عرض الإحصائيات بالتصميم الجديد -->
+                    <div class="stats-container">
+                        <div class="stat-item" title="إجمالي الرسائل المرسلة إلى المساعد الذكي">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                            <div class="stat-info">
+                                <span class="stat-number" id="message-counter-number">0</span>
+                                <span class="stat-label">رسالة</span>
+                            </div>
+                        </div>
+                        <div class="stat-item" title="إجمالي عدد مرات تشغيل الصوت">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon></svg>
+                            <div class="stat-info">
+                                <span class="stat-number" id="audio-counter-number">0</span>
+                                <span class="stat-label">استماع</span>
+                            </div>
+                        </div>
+                    </div>
+    
+    
+                <div class="controls">
+                    <button id="admin-panel-btn" class="icon-btn" title="لوحة التحكم للمشرف" aria-label="Admin Panel">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color:white">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                            <path d="m9 12 2 2 4-4"></path>
+                        </svg>
+                    </button>
+                    <button id="save-chat-pdf-btn" class="icon-btn" title="حفظ المحادثة كـ PDF" aria-label="Save chat as PDF">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color:white">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7 10 12 15 17 10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                    </button>
+                    <button id="dark-mode-toggle" class="icon-btn" title="تبديل الوضع الليلي / النهاري"
+                        aria-label="Toggle dark mode">
+                        <svg id="dark-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+                            fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                            stroke-linejoin="round" style="color:white">
+                            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            </div>
+        </div>
+
+        <div id="chat-container"></div>
+
+        <div class="bottom-container">
+            <div id="suggestions-container" aria-live="polite" aria-atomic="true"></div>
+            <div id="image-preview-container"></div>
+            <div class="input-area">
+                <button id="upload-img-btn" class="icon-btn" title="إرفاق صورة">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path
+                            d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48">
+                        </path>
+                    </svg>
+                </button>
+                <input type="file" id="image-upload-input" accept="image/*" style="display: none;">
+
+                <input id="user-input" class="text-input" placeholder="اكتب رسالتك هنا..." />
+                <button id="send-btn" class="send-btn" disabled title="أرسل">إرسال</button>
+            </div>
+            <p class="disclaimer-text">ChatGPT can make mistakes, but Chat Helwan is always right.</p>
+        </div>
+    </div>
+    
+    <!-- Admin Password Modal -->
+    <div id="password-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <button class="modal-close-btn" id="close-password-modal">&times;</button>
+            <h2 class="modal-title">دخول لوحة التحكم</h2>
+            <p class="modal-description">الرجاء إدخال كلمة المرور للمتابعة.</p>
+            <input type="password" id="password-input" class="modal-input" placeholder="كلمة المرور">
+            <button id="password-submit-btn" class="modal-submit-btn">دخول</button>
+            <p id="password-error" class="modal-error hidden">كلمة المرور غير صحيحة.</p>
+        </div>
+    </div>
+
+    <!-- Admin Panel Modal (Replaces Chat Logs Modal) -->
+    <div id="admin-modal" class="modal-overlay hidden">
+        <div class="modal-content admin-panel-content">
+            <button class="modal-close-btn" id="close-admin-modal">&times;</button>
+            <h2 class="modal-title">لوحة التحكم</h2>
+            
+            <div class="admin-modal-tabs">
+                <button class="tab-btn active" data-tab="logs">سجل المحادثات</button>
+                <button class="tab-btn" data-tab="temp-data">بيانات مؤقتة</button>
+            </div>
+
+            <!-- Tab Content: Logs -->
+            <div id="logs-tab" class="tab-content active">
+                <div class="logs-header">
+                    <p class="modal-description">عرض سجل المحادثات بين المستخدمين والمساعد.</p>
+                    <button id="download-logs-pdf-btn" class="download-pdf-btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                        تحميل كـ PDF
+                    </button>
+                </div>
+                <div class="logs-container">
+                    <div id="logs-loader" class="loader-container hidden">
+                        <div class="loader"></div>
+                        <p>جاري تحميل السجلات...</p>
+                    </div>
+                    <table id="logs-table">
+                        <thead>
+                            <tr>
+                                <th>السؤال</th>
+                                <th>الإجابة</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Log rows will be inserted here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Tab Content: Temporary Data -->
+            <div id="temp-data-tab" class="tab-content">
+                 <p class="modal-description">أضف هنا أي معلومات أو بيانات مؤقتة (مثل إعلان عن فعالية قادمة) ليستخدمها المساعد في ردوده. سيتم حذف هذه البيانات عند إعادة تحميل الصفحة.</p>
+                 <textarea id="temp-data-input" class="modal-input" rows="8" placeholder="مثال: غداً سيتم عقد ورشة عمل عن الذكاء الاصطناعي في قاعة المؤتمرات الساعة 10 صباحاً."></textarea>
+                 <div class="modal-buttons-container">
+                    <button id="save-temp-data-btn" class="modal-submit-btn">حفظ وتفعيل البيانات</button>
+                    <button id="clear-temp-data-btn" class="modal-clear-btn">حذف البيانات</button>
+                 </div>
+                 <p id="temp-data-status" class="modal-status hidden"></p>
+            </div>
+        </div>
+    </div>
+
+
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+   <script type="module" src="main.js"></script>
+</body>
+</html>
+
+

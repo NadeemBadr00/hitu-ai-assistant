@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تسجيل الحضور - إحصاء 2</title>
+
+    <!-- Favicon -->
+    <link rel="icon" href="https://ai4roadmap.com/logo.png" type="image/png">
+    
+    <!-- Scripts -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body { font-family: 'Cairo', sans-serif; background-color: #f8fafc; }
+        .loader { border: 5px solid #f3f3f3; border-radius: 50%; border-top: 5px solid #3498db; width: 50px; height: 50px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        button:disabled { opacity: 0.6; cursor: not-allowed; }
+        .rtl-input::placeholder { text-align: right; }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen bg-slate-50">
+
+    <div id="loader-overlay" class="fixed inset-0 bg-white/80 backdrop-blur-sm flex justify-center items-center z-50">
+        <div class="loader"></div>
+    </div>
+
+    <div id="registration-closed-view" class="hidden text-center p-8">
+        <svg class="mx-auto h-16 w-16 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <h1 class="mt-4 text-3xl font-bold text-gray-800">التسجيل مغلق حاليًا</h1>
+        <p class="mt-2 text-lg text-gray-600">يرجى الانتظار حتى يفتح الدكتور باب التسجيل.</p>
+    </div>
+    
+    <div id="app-view" class="w-full max-w-lg mx-auto hidden">
+        <div class="bg-white rounded-2xl shadow-xl p-8 m-4">
+            <div class="text-center mb-8">
+                <img src="https://ai4roadmap.com/logo.png" alt="Logo" class="h-16 mx-auto mb-4">
+                <h1 class="text-3xl font-bold text-gray-800">تسجيل الحضور</h1>
+                <p id="session-name-display" class="mt-2 text-lg text-indigo-600 font-semibold">لمادة إحصاء 2</p>
+            </div>
+
+            <div id="form-view">
+                <form id="attendance-form" novalidate>
+                    <div class="space-y-5">
+                        <div>
+                            <label for="student-name" class="block mb-2 text-sm font-medium text-gray-900">الاسم بالكامل</label>
+                            <input type="text" id="student-name" class="rtl-input bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-3" placeholder="اكتب اسمك هنا" required>
+                        </div>
+                        <div>
+                            <label for="department-select" class="block mb-2 text-sm font-medium text-gray-900">القسم</label>
+                            <select id="department-select" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-3" required>
+                                <option value="" disabled selected>-- اختر القسم --</option>
+                                <option value="علوم بيانات">علوم بيانات</option>
+                                <option value="ذكاء اصطناعي">ذكاء اصطناعي</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="class-level-select" class="block mb-2 text-sm font-medium text-gray-900">الفرقة</label>
+                            <select id="class-level-select" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-3" required>
+                                <option value="" disabled selected>-- اختر الفرقة --</option>
+                                <option value="الأولى">الأولى</option>
+                                <option value="الثانية">الثانية</option>
+                                <option value="الثالثة">الثالثة</option>
+                                <option value="الرابعة">الرابعة</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mt-8">
+                        <button type="submit" id="submit-btn" class="w-full text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-lg px-5 py-3 text-center">تسجيل الحضور الآن</button>
+                    </div>
+                </form>
+            </div>
+            
+            <div id="success-view" class="hidden text-center py-8">
+                 <svg class="mx-auto h-16 w-16 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <h2 class="mt-4 text-3xl font-bold text-gray-800">تم التسجيل بنجاح!</h2>
+                <p class="mt-2 text-lg text-gray-600">شكراً لك، يمكنك الآن إغلاق هذه الصفحة.</p>
+            </div>
+
+        </div>
+    </div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        const firebaseConfig = {
+            apiKey: "AIzaSyC-fNlQQHC4Fqbx2wIBoyPOm8o43PUhJrk",
+            authDomain: "ai-roadmap-nadeem.firebaseapp.com",
+            projectId: "ai-roadmap-nadeem",
+            storageBucket: "ai-roadmap-nadeem.appspot.com",
+            messagingSenderId: "882087451108",
+            appId: "1:882087451108:web:65fbb714732407d1768ff1"
+        };
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        const loaderOverlay = document.getElementById('loader-overlay');
+        const appView = document.getElementById('app-view');
+        const formView = document.getElementById('form-view');
+        const successView = document.getElementById('success-view');
+        const registrationClosedView = document.getElementById('registration-closed-view');
+        const attendanceForm = document.getElementById('attendance-form');
+        const submitBtn = document.getElementById('submit-btn');
+
+        let activeSessionKey = null;
+
+        try {
+            const configDocRef = doc(db, "stat2_config", "session");
+            const configDoc = await getDoc(configDocRef);
+            
+            if (configDoc.exists()) {
+                const configData = configDoc.data();
+                activeSessionKey = configData.activeKey;
+                const isRegistrationOpen = configData.isRegistrationOpen;
+
+                if (isRegistrationOpen && activeSessionKey) {
+                    document.getElementById('session-name-display').textContent = `تسجيل حضورك في: ${activeSessionKey.replace(/_/g, ' ')}`;
+                    appView.classList.remove('hidden');
+                } else {
+                    registrationClosedView.classList.remove('hidden');
+                }
+            } else {
+                 registrationClosedView.classList.remove('hidden');
+            }
+        } catch (error) {
+            console.error("Error fetching config:", error);
+            registrationClosedView.classList.remove('hidden');
+        } finally {
+            loaderOverlay.classList.add('hidden');
+        }
+
+
+        attendanceForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!attendanceForm.checkValidity() || !activeSessionKey) {
+                alert('الرجاء ملء جميع الحقول المطلوبة.');
+                return;
+            }
+            
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'جاري الحفظ...';
+
+            const studentName = document.getElementById('student-name').value.trim();
+            const department = document.getElementById('department-select').value;
+            const classLevel = document.getElementById('class-level-select').value;
+            
+            // Use student name as document ID for easy lookup and update
+            const studentDocRef = doc(db, "stat2_students", studentName);
+
+            try {
+                const studentDoc = await getDoc(studentDocRef);
+                let studentData = {
+                    name: studentName,
+                    department,
+                    classLevel,
+                    lastUpdated: serverTimestamp()
+                };
+
+                // Mark the current session as attended
+                studentData[activeSessionKey] = true;
+                
+                if (studentDoc.exists()) {
+                    // Merge with existing data to keep previous attendance
+                    studentData = { ...studentDoc.data(), ...studentData };
+                }
+
+                await setDoc(studentDocRef, studentData, { merge: true });
+
+                formView.classList.add('hidden');
+                successView.classList.remove('hidden');
+
+            } catch (error) {
+                console.error("Error writing document: ", error);
+                alert('حدث خطأ أثناء حفظ البيانات. الرجاء المحاولة مرة أخرى.');
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'تسجيل الحضور الآن';
+            }
+        });
+    });
+</script>
+
+</body>
+</html>
+
