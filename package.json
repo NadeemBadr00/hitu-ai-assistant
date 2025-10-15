@@ -16,5 +16,11 @@
   "bugs": {
     "url": "https://github.com/NadeemBadr00/hitu-ai-assistant/issues"
   },
-  "homepage": "https://github.com/NadeemBadr00/hitu-ai-assistant#readme"
+  "homepage": "https://github.com/NadeemBadr00/hitu-ai-assistant#readme",
+  "dependencies": {
+    "axios": "^1.12.2",
+    "cors": "^2.8.5",
+    "firebase-admin": "^13.5.0",
+    "firebase-functions": "^6.5.0"
+  }
 }
