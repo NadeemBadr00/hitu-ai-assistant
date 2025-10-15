@@ -4,12 +4,6 @@ import { collection, getDocs, query, orderBy, limit, doc, onSnapshot, runTransac
 import { systemPrompt, getSystemPrompt } from './system-prompt.js';
 import { suggestedQuestions } from './suggested-questions.js';
 import { getStudentLeadersInfo } from './manager.js';
-// [DELETED] No longer need to import API keys on the client-side
-// import { apiKeyManager as chatApiKeyManager } from './chat-api-keys.js';
-// import { apiKeyManager as ttsApiKeyManager } from './tts-api-keys.js';
-
-
-// --- [بداية الكود الجديد] ---
 
 // --- عناصر واجهة المستخدم الرئيسية ---
 const chatContainer = document.getElementById('chat-container');
@@ -24,7 +18,7 @@ const messageCounter = document.getElementById('message-counter-number');
 const audioCounter = document.getElementById('audio-counter-number');
 const savePdfBtn = document.getElementById('save-chat-pdf-btn');
 
-// --- [MODIFIED] Define the secure proxy URL ---
+// --- عنوان URL الخاص بوظيفة Netlify الآمنة ---
 const SECURE_API_PROXY_URL = '/.netlify/functions/proxy';
 
 // --- عناصر لوحة التحكم للمسؤول ---
@@ -116,7 +110,6 @@ async function fetchAndDisplayChatLogs() {
 adminPanelBtn.addEventListener('click', () => {
     if (isAdmin) {
         adminModal.classList.remove('hidden');
-        // عند فتح اللوحة، اعرض البيانات المؤقتة الحالية واجلب السجلات
         tempDataInput.value = temporaryData;
         fetchAndDisplayChatLogs(); 
     } else {
@@ -128,7 +121,7 @@ closeAdminModalBtn.addEventListener('click', () => {
     adminModal.classList.add('hidden');
 });
 
-// --- مراقبة حالة المصادقة (الجزء الأهم في الأمان) ---
+// --- مراقبة حالة المصادقة ---
 onAuthStateChanged(auth, (user) => {
     if (user) {
         if (user.isAnonymous) {
@@ -137,7 +130,7 @@ onAuthStateChanged(auth, (user) => {
         } else if (user.email && user.email.toLowerCase() === ADMIN_EMAIL) {
             isAdmin = true;
             console.log("Admin authenticated successfully.");
-            adminPanelBtn.style.color = '#68D391'; // أخضر
+            adminPanelBtn.style.color = '#68D391';
         } else {
             isAdmin = false;
             console.warn("Non-admin user signed in:", user.email);
@@ -149,12 +142,6 @@ onAuthStateChanged(auth, (user) => {
         signInAnonymously(auth).catch(err => console.error("Initial anonymous login failed:", err));
     }
 });
-
-// --- باقي كود التطبيق يتبع هنا ---
-// ... (كل الدوال الأخرى مثل sendMessage, addMessage, etc.)
-// ... لقد قمت بتضمين كل الكود الأصلي بعد هذا الجزء ليكون الملف كاملاً
-
-// --- [نهاية الكود الجديد] ---
 
 function saveChatHistory() {
     try {
@@ -200,7 +187,6 @@ function loadChatHistory() {
     }
 }
 
-
 function flattenPeopleData(dataObject) {
     for (const key in dataObject) {
         const item = dataObject[key];
@@ -217,7 +203,6 @@ function flattenPeopleData(dataObject) {
 }
 
 flattenPeopleData(studentLeadersData);
-
 
 function showTypingIndicator() {
     if (typingIndicatorElement) return;
@@ -473,29 +458,7 @@ async function updateSuggestions(contextText = '') {
         if (finalSuggestions.size >= 4) break;
         finalSuggestions.add(q);
     }
-
-    try {
-        const genPrompt = `اقترح سؤال متابعة واحد قصير ومثير للاهتمام بناءً على الرد الأخير. كن موجزاً جداً. الرد: "${contextText.substring(0, 150)}"`;
-        const apiKey = chatApiKeyManager.getNextKey();
-        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                contents: [{ parts: [{ text: genPrompt }] }],
-                generationConfig: { maxOutputTokens: 50, temperature: 0.8 }
-            })
-        });
-        if (res.ok) {
-            const data = await res.json();
-            const genText = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim().replace(/^- /, '');
-            if (genText && genText.includes('?')) {
-                finalSuggestions.add(genText);
-            }
-        }
-    } catch (e) {
-        console.warn("Could not generate a suggestion:", e);
-    }
-
+    
     if (finalSuggestions.size === 0) {
         shuffled.slice(0, 4).forEach(q => finalSuggestions.add(q));
     }
@@ -675,7 +638,6 @@ async function logConversation(question, answer) {
         console.error("Error adding document to chatLogs: ", e);
     }
 }
-
 
 function arrayBufferToBase64(buffer) {
     let binary = '';
@@ -897,7 +859,6 @@ async function fetchOrGetCachedAudio(text, buttonElement) {
 
     for (let attempt = 0; attempt < maxRetries; attempt++) {
             try {
-            // [MODIFIED] Call our secure Netlify function instead of Google directly
             const response = await fetch(SECURE_API_PROXY_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -1112,14 +1073,9 @@ async function sendMessage() {
 
     const userObj = { role: 'user', parts: parts };
     const conversation = [...chatHistory, userObj];
-
-    let success = false;
-    const totalKeys = chatApiKeyManager.getTotalKeys();
-    let delay = 1000;
     
     const finalSystemPrompt = getSystemPrompt(temporaryData);
 
-    // [MODIFIED] Call our secure Netlify function for chat
     try {
         const res = await fetch(SECURE_API_PROXY_URL, {
             method: 'POST',
@@ -1354,5 +1310,4 @@ chatContainer.addEventListener('click', e => {
         }
     }
 });
-
 
