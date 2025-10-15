@@ -1,4 +1,4 @@
-import { db, auth } from './firebase-config.js';
+import { db, auth } from './firebase-init.js';
 import { GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { collection, getDocs, query, orderBy, limit, doc, onSnapshot, runTransaction, addDoc, serverTimestamp, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { systemPrompt, getSystemPrompt } from './system-prompt.js';
@@ -18,8 +18,8 @@ const messageCounter = document.getElementById('message-counter-number');
 const audioCounter = document.getElementById('audio-counter-number');
 const savePdfBtn = document.getElementById('save-chat-pdf-btn');
 
-// --- عنوان URL الخاص بوظيفة Netlify الآمنة ---
-const SECURE_API_PROXY_URL = '/.netlify/functions/proxy';
+// --- [التعديل النهائي] عنوان URL الكامل لوظيفة Netlify الآمنة ---
+const SECURE_API_PROXY_URL = 'https://frolicking-pudding-a38524.netlify.app/.netlify/functions/proxy';
 
 // --- عناصر لوحة التحكم للمسؤول ---
 const adminPanelBtn = document.getElementById('admin-panel-btn');
