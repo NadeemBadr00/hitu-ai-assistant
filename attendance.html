@@ -3,6 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- SECURE: Content Security Policy -->
+    <meta http-equiv="Content-Security-Policy" content="
+        default-src 'none'; 
+        script-src 'self' https://cdn.tailwindcss.com 'sha256-+ydjYchXkins75FPNA3oemjRvKjJ4xi8CTFQmr1s+6c=' 'sha256-aJ2OXzogKoNofn3vFYSjFCu5iFnVZOOakRe2Z6GdMC8=';
+        style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+        img-src 'self' https://ai4roadmap.com;
+        font-src https://fonts.gstatic.com;
+        connect-src 'self' wss://*.firebaseio.com https://*.googleapis.com https://securetoken.googleapis.com;
+        frame-src 'self';
+        object-src 'none';
+        base-uri 'self';
+        form-action 'self';
+    ">
+
     <title>تسجيل الحضور - إحصاء 2</title>
 
     <!-- Favicon -->
@@ -18,6 +33,8 @@
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         button:disabled { opacity: 0.6; cursor: not-allowed; }
         .rtl-input::placeholder { text-align: right; }
+        .modal-backdrop { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.3); backdrop-filter: blur(4px); display: flex; justify-content: center; align-items: center; z-index: 50; transition: opacity 0.3s ease-in-out; }
+        .modal-backdrop.hidden { opacity: 0; pointer-events: none; }
     </style>
 </head>
 <body class="flex items-center justify-center min-h-screen bg-slate-50">
@@ -81,26 +98,31 @@
                 <h2 class="mt-4 text-3xl font-bold text-gray-800">تم التسجيل بنجاح!</h2>
                 <p class="mt-2 text-lg text-gray-600">شكراً لك، يمكنك الآن إغلاق هذه الصفحة.</p>
             </div>
-
+        </div>
+    </div>
+    
+    <!-- SECURE: Message Modal -->
+    <div id="message-modal" class="modal-backdrop hidden">
+        <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-sm text-center">
+            <h2 id="message-modal-title" class="text-2xl font-bold text-gray-800 mb-4"></h2>
+            <p id="message-modal-body" class="text-gray-600 mb-6"></p>
+            <div id="message-modal-actions" class="flex justify-center gap-3"></div>
         </div>
     </div>
 
+<!-- SECURE: Using Firebase Hosting SDKs -->
+<script src="/__/firebase/8.10.1/firebase-app.js"></script>
+<script src="/__/firebase/8.10.1/firebase-auth.js"></script>
+<script src="/__/firebase/8.10.1/firebase-firestore.js"></script>
+<script src="/__/firebase/init.js"></script>
+
 <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
     document.addEventListener('DOMContentLoaded', async () => {
-        const firebaseConfig = {
-            apiKey: "AIzaSyC-fNlQQHC4Fqbx2wIBoyPOm8o43PUhJrk",
-            authDomain: "ai-roadmap-nadeem.firebaseapp.com",
-            projectId: "ai-roadmap-nadeem",
-            storageBucket: "ai-roadmap-nadeem.appspot.com",
-            messagingSenderId: "882087451108",
-            appId: "1:882087451108:web:65fbb714732407d1768ff1"
-        };
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+        // --- Firebase Initialization is handled by /__/firebase/init.js ---
+        const db = firebase.firestore();
+        const auth = firebase.auth();
 
+        // --- DOM Elements ---
         const loaderOverlay = document.getElementById('loader-overlay');
         const appView = document.getElementById('app-view');
         const formView = document.getElementById('form-view');
@@ -108,39 +130,58 @@
         const registrationClosedView = document.getElementById('registration-closed-view');
         const attendanceForm = document.getElementById('attendance-form');
         const submitBtn = document.getElementById('submit-btn');
+        const messageModal = document.getElementById('message-modal');
 
         let activeSessionKey = null;
 
-        try {
-            const configDocRef = doc(db, "stat2_config", "session");
-            const configDoc = await getDoc(configDocRef);
-            
-            if (configDoc.exists()) {
-                const configData = configDoc.data();
-                activeSessionKey = configData.activeKey;
-                const isRegistrationOpen = configData.isRegistrationOpen;
+        // --- SECURITY: Sanitize user input to prevent XSS ---
+        const sanitizeHTML = (str) => {
+            const temp = document.createElement('div');
+            temp.textContent = str;
+            return temp.innerHTML;
+        };
 
-                if (isRegistrationOpen && activeSessionKey) {
-                    document.getElementById('session-name-display').textContent = `تسجيل حضورك في: ${activeSessionKey.replace(/_/g, ' ')}`;
-                    appView.classList.remove('hidden');
+        // --- UI Functions ---
+        function showMessageModal(title, body) {
+            document.getElementById('message-modal-title').textContent = title;
+            document.getElementById('message-modal-body').textContent = body;
+            const actionsContainer = document.getElementById('message-modal-actions');
+            actionsContainer.innerHTML = `<button class="bg-blue-600 text-white px-8 py-2 rounded-lg font-semibold hover:bg-blue-700 transition">حسنًا</button>`;
+            actionsContainer.firstChild.onclick = () => messageModal.classList.add('hidden');
+            messageModal.classList.remove('hidden');
+        }
+
+        async function initializeApp() {
+            try {
+                const configDocRef = db.collection("stat2_config").doc("session");
+                const configDoc = await configDocRef.get();
+                
+                if (configDoc.exists) {
+                    const configData = configDoc.data();
+                    activeSessionKey = configData.activeKey;
+                    const isRegistrationOpen = configData.isRegistrationOpen;
+
+                    if (isRegistrationOpen && activeSessionKey) {
+                        document.getElementById('session-name-display').textContent = `تسجيل حضورك في: ${sanitizeHTML(activeSessionKey.replace(/_/g, ' '))}`;
+                        appView.classList.remove('hidden');
+                    } else {
+                        registrationClosedView.classList.remove('hidden');
+                    }
                 } else {
                     registrationClosedView.classList.remove('hidden');
                 }
-            } else {
-                 registrationClosedView.classList.remove('hidden');
+            } catch (error) {
+                console.error("Error fetching config:", error);
+                registrationClosedView.classList.remove('hidden');
+            } finally {
+                loaderOverlay.classList.add('hidden');
             }
-        } catch (error) {
-            console.error("Error fetching config:", error);
-            registrationClosedView.classList.remove('hidden');
-        } finally {
-            loaderOverlay.classList.add('hidden');
         }
-
 
         attendanceForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             if (!attendanceForm.checkValidity() || !activeSessionKey) {
-                alert('الرجاء ملء جميع الحقول المطلوبة.');
+                showMessageModal('خطأ', 'الرجاء ملء جميع الحقول المطلوبة.');
                 return;
             }
             
@@ -151,36 +192,48 @@
             const department = document.getElementById('department-select').value;
             const classLevel = document.getElementById('class-level-select').value;
             
-            // Use student name as document ID for easy lookup and update
-            const studentDocRef = doc(db, "stat2_students", studentName);
+            // Using student name as document ID. Firestore handles sanitization for doc IDs.
+            const studentDocRef = db.collection("stat2_students").doc(studentName);
 
             try {
-                const studentDoc = await getDoc(studentDocRef);
+                const studentDoc = await studentDocRef.get();
                 let studentData = {
-                    name: studentName,
+                    name: studentName, // Store the original name
                     department,
                     classLevel,
-                    lastUpdated: serverTimestamp()
+                    lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
                 };
 
-                // Mark the current session as attended
                 studentData[activeSessionKey] = true;
                 
-                if (studentDoc.exists()) {
-                    // Merge with existing data to keep previous attendance
+                if (studentDoc.exists) {
                     studentData = { ...studentDoc.data(), ...studentData };
                 }
 
-                await setDoc(studentDocRef, studentData, { merge: true });
+                await studentDocRef.set(studentData, { merge: true });
 
                 formView.classList.add('hidden');
                 successView.classList.remove('hidden');
 
             } catch (error) {
                 console.error("Error writing document: ", error);
-                alert('حدث خطأ أثناء حفظ البيانات. الرجاء المحاولة مرة أخرى.');
+                showMessageModal('خطأ', 'حدث خطأ أثناء حفظ البيانات. الرجاء المحاولة مرة أخرى.');
                 submitBtn.disabled = false;
                 submitBtn.textContent = 'تسجيل الحضور الآن';
+            }
+        });
+
+        // --- App Start Logic ---
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                initializeApp();
+            } else {
+                auth.signInAnonymously().catch(error => {
+                    console.error("Anonymous sign-in failed:", error);
+                    loaderOverlay.classList.add('hidden');
+                    registrationClosedView.classList.remove('hidden');
+                    showMessageModal('خطأ فادح', 'لا يمكن الاتصال بالخادم. يرجى تحديث الصفحة.');
+                });
             }
         });
     });

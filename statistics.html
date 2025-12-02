@@ -3,6 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- SECURE: Content Security Policy -->
+    <meta http-equiv="Content-Security-Policy" content="
+        default-src 'none'; 
+        script-src 'self' https://www.gstatic.com https://cdn.tailwindcss.com https://cdnjs.cloudflare.com 'sha256-+ydjYchXkins75FPNA3oemjRvKjJ4xi8CTFQmr1s+6c=' 'sha256-nb4KQumjRySznYYesr+EG20sRKsft0PZKJAGcJm6ca8=' 'sha256-9XPR9xQRG8du6sBf1WrBWBgujQIK7vCiB2err99ccsc=' 'sha256-wQkkUCjgSlj947STM6eVZ9glFS8hMoczyfCxC+gsDho=' 'sha256-NCwyVdmq8RZy2Sv7sNYrJz6/S5X+SqsZDepLIxTB4nI=';
+        style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+        img-src 'self' https://ai4roadmap.com data:;
+        font-src https://fonts.gstatic.com;
+        connect-src 'self' wss://*.firebaseio.com https://*.googleapis.com https://securetoken.googleapis.com;
+        frame-src 'self';
+        object-src 'none';
+        base-uri 'self';
+        form-action 'self';
+    ">
+
     <title>تسجيل الحضور | إحصاء 2 - د. سيد الفار</title>
 
     <!-- Favicon -->
@@ -39,7 +54,7 @@
 </head>
 <body class="bg-slate-100 flex flex-col min-h-screen">
     <!-- Loader -->
-    <div id="loader-overlay" class="modal-backdrop hidden"><div class="loader"></div></div>
+    <div id="loader-overlay" class="modal-backdrop"><div class="loader"></div></div>
 
     <!-- Login Modal -->
     <div id="login-modal" class="modal-backdrop hidden">
@@ -144,23 +159,18 @@
         </div>
     </div>
 
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-    import { getFirestore, collection, onSnapshot, query, orderBy, doc, deleteDoc, getDocs, writeBatch, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+<!-- SECURE: Using Firebase Hosting SDKs -->
+<script src="/__/firebase/8.10.1/firebase-app.js"></script>
+<script src="/__/firebase/8.10.1/firebase-auth.js"></script>
+<script src="/__/firebase/8.10.1/firebase-firestore.js"></script>
+<script src="/__/firebase/init.js"></script>
 
+<script type="module">
     document.addEventListener('DOMContentLoaded', () => {
-        const firebaseConfig = {
-            apiKey: "AIzaSyC-fNlQQHC4Fqbx2wIBoyPOm8o43PUhJrk",
-            authDomain: "ai-roadmap-nadeem.firebaseapp.com",
-            projectId: "ai-roadmap-nadeem",
-            storageBucket: "ai-roadmap-nadeem.appspot.com",
-            messagingSenderId: "882087451108",
-            appId: "1:882087451108:web:65fbb714732407d1768ff1"
-        };
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
+        // --- Firebase Initialization ---
+        const db = firebase.firestore();
+        const auth = firebase.auth();
+        const GoogleAuthProvider = firebase.auth.GoogleAuthProvider;
 
         // --- DOM Elements ---
         const loaderOverlay = document.getElementById('loader-overlay');
@@ -186,11 +196,21 @@
         let isAdmin = false;
         let activeSessionKey = null;
         let isRegistrationOpen = false;
+        let unsubscribeStudents = null; // To hold the listener function
+
         const SESSION_KEYS = [
             ...Array.from({ length: 8 }, (_, i) => `Att. ${i + 1}`),
             ...Array.from({ length: 6 }, (_, i) => `Task ${i + 1}`),
             'Bonus'
         ];
+
+        // --- SECURITY: Sanitize user input to prevent XSS ---
+        const sanitizeHTML = (str) => {
+            if (!str) return '';
+            const temp = document.createElement('div');
+            temp.textContent = str;
+            return temp.innerHTML;
+        };
 
         // --- Helper Functions ---
         const showLoader = () => loaderOverlay.classList.remove('hidden');
@@ -219,20 +239,33 @@
         
         // --- UI Update Functions ---
         function updateUIAfterAuthStateChange(user) {
-            isAdmin = !!(user && user.email);
+            const authorizedAdmins = ['nadembadrs2@gmail.com', 'dr.sayed.666@gmail.com'];
+            const wasAdmin = isAdmin;
+            isAdmin = !!(user && user.email && authorizedAdmins.includes(user.email.toLowerCase()));
+            
             adminLoginBtn.classList.toggle('hidden', isAdmin);
             logoutBtn.classList.toggle('hidden', !isAdmin);
             exportExcelBtn.classList.toggle('hidden', !isAdmin);
             viewAttendanceBtn.classList.toggle('hidden', !isAdmin);
             adminSessionControls.classList.toggle('hidden', !isAdmin);
             totalStudentsCountEl.classList.toggle('hidden', !isAdmin);
-            renderAttendanceTable(); // To show/hide delete buttons
+            renderAttendanceTable(); 
+
+            if(isAdmin && !wasAdmin) {
+                attachStudentsListener();
+            } else if (!isAdmin && wasAdmin) {
+                if (unsubscribeStudents) {
+                    unsubscribeStudents();
+                    unsubscribeStudents = null;
+                }
+                studentsData = []; 
+                updateSessionAndStudentDisplay();
+            }
         }
 
         function updateSessionAndStudentDisplay(latestEntryId = null) {
-            // Update session title and registration status display
             const sessionName = (activeSessionKey || 'N/A').replace(/_/g, ' ');
-            sessionTitleEl.textContent = `امسح الكود لتسجيل: ${sessionName}`;
+            sessionTitleEl.textContent = `امسح الكود لتسجيل: ${sanitizeHTML(sessionName)}`;
             
             if (isRegistrationOpen) {
                 regStatusDisplay.textContent = 'مفتوح';
@@ -242,12 +275,10 @@
                 regStatusDisplay.className = 'font-bold text-red-600';
             }
 
-            // Update session and total counts
             const sessionCount = studentsData.filter(s => s[activeSessionKey]).length;
             sessionAttendeesEl.querySelector('span').textContent = sessionCount;
             totalStudentsCountEl.querySelector('span').textContent = studentsData.length;
 
-            // Update live list for current session's attendees
             const attendees = studentsData.filter(entry => entry[activeSessionKey]);
             if (attendees.length === 0) {
                  liveAttendanceList.innerHTML = `<p class="text-center text-gray-500 py-8">لم يسجل أحد في هذه الجلسة بعد.</p>`;
@@ -256,8 +287,8 @@
                     const animationClass = entry.id === latestEntryId ? 'animate-new-item' : '';
                     return `<div class="flex items-center justify-between p-3 bg-slate-100 rounded-lg ${animationClass}">
                                 <div class="flex items-center gap-3">
-                                    <span class="font-semibold text-gray-800">${entry.name}</span>
-                                    <span class="text-sm text-indigo-600 font-medium">${entry.department}</span>
+                                    <span class="font-semibold text-gray-800">${sanitizeHTML(entry.name)}</span>
+                                    <span class="text-sm text-indigo-600 font-medium">${sanitizeHTML(entry.department)}</span>
                                 </div>
                             </div>`;
                 }).join('');
@@ -266,6 +297,10 @@
         }
 
         function renderAttendanceTable() {
+            if (!isAdmin) {
+                attendanceTableBody.innerHTML = '';
+                return;
+            }
             if (studentsData.length === 0) {
                 attendanceTableBody.innerHTML = `<tr><td colspan="5" class="text-center py-10 text-gray-500">لا يوجد طلاب مسجلون بعد.</td></tr>`;
                 return;
@@ -273,9 +308,9 @@
             attendanceTableBody.innerHTML = studentsData.map(entry => {
                 const timeString = entry.lastUpdated?.toDate()?.toLocaleString('ar-EG') || 'غير متاح';
                 return `<tr>
-                    <td class="px-6 py-4 whitespace-nowrap">${entry.name}</td>
-                    <td class="px-6 py-4 whitespace-nowrap">${entry.department}</td>
-                    <td class="px-6 py-4 whitespace-nowrap">${entry.classLevel || '-'}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${sanitizeHTML(entry.name)}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${sanitizeHTML(entry.department)}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${sanitizeHTML(entry.classLevel)}</td>
                     <td class="px-6 py-4 whitespace-nowrap">${timeString}</td>
                     <td class="px-6 py-4 whitespace-nowrap">${isAdmin ? `<button data-id="${entry.id}" class="delete-btn text-red-500 hover:text-red-700">حذف</button>`: ''}</td>
                 </tr>`;
@@ -290,7 +325,7 @@
         
         async function performDelete(docId) {
             closeAllModals(); showLoader();
-            try { await deleteDoc(doc(db, "stat2_students", docId)); } 
+            try { await db.collection("stat2_students").doc(docId).delete(); } 
             catch (error) { console.error("Error deleting document: ", error); } 
             finally { hideLoader(); }
         }
@@ -298,8 +333,8 @@
         async function performDeleteAll() {
             closeAllModals(); if (studentsData.length === 0) return; showLoader();
             try {
-                const batch = writeBatch(db);
-                studentsData.forEach(student => batch.delete(doc(db, "stat2_students", student.id)));
+                const batch = db.batch();
+                studentsData.forEach(student => batch.delete(db.collection("stat2_students").doc(student.id)));
                 await batch.commit();
             } catch (error) { console.error("Error deleting all documents: ", error); } 
             finally { hideLoader(); }
@@ -317,34 +352,41 @@
             if (!isAdmin) return;
             document.querySelectorAll('.delete-btn').forEach(btn => btn.addEventListener('click', handleDeleteClick));
         }
+        
+        function attachStudentsListener() {
+             if (unsubscribeStudents) unsubscribeStudents(); 
+             
+             let isFirstLoad = true;
+             const q = db.collection("stat2_students").orderBy("lastUpdated", "desc");
+             unsubscribeStudents = q.onSnapshot((snapshot) => {
+                 const oldDataMap = new Map(studentsData.map(s => [s.id, s.lastUpdated?.seconds]));
+                 studentsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-        function initializeDataListeners() {
-            const sessionRef = doc(db, "stat2_config", "session");
-            onSnapshot(sessionRef, (doc) => {
+                 let latestEntryId = null;
+                 if (!isFirstLoad && activeSessionKey) {
+                     const newEntry = studentsData.find(s => {
+                         const oldTimestamp = oldDataMap.get(s.id) || 0;
+                         const newTimestamp = s.lastUpdated?.seconds || 0;
+                         return newTimestamp > oldTimestamp && s[activeSessionKey];
+                     });
+                     if(newEntry) latestEntryId = newEntry.id;
+                 }
+                 
+                 updateSessionAndStudentDisplay(latestEntryId);
+                 isFirstLoad = false;
+             }, (error) => {
+                 console.error("Error in students snapshot listener:", error);
+                 liveAttendanceList.innerHTML = `<p class="text-center text-red-500 py-8">خطأ في تحميل البيانات.</p>`;
+             });
+        }
+
+        function initializeConfigListener() {
+            const sessionRef = db.collection("stat2_config").doc("session");
+            sessionRef.onSnapshot((doc) => {
                 const data = doc.data() || {};
                 activeSessionKey = data.activeKey || null;
                 isRegistrationOpen = data.isRegistrationOpen || false;
                 updateSessionAndStudentDisplay();
-            });
-
-            let isFirstLoad = true;
-            const q = query(collection(db, "stat2_students"), orderBy("lastUpdated", "desc"));
-            onSnapshot(q, (snapshot) => {
-                const oldDataMap = new Map(studentsData.map(s => [s.id, s.lastUpdated?.seconds]));
-                studentsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
-                let latestEntryId = null;
-                if (!isFirstLoad && activeSessionKey) {
-                    const newEntry = studentsData.find(s => {
-                        const oldTimestamp = oldDataMap.get(s.id) || 0;
-                        const newTimestamp = s.lastUpdated?.seconds || 0;
-                        return newTimestamp > oldTimestamp && s[activeSessionKey];
-                    });
-                    if(newEntry) latestEntryId = newEntry.id;
-                }
-                
-                updateSessionAndStudentDisplay(latestEntryId);
-                isFirstLoad = false;
             });
         }
         
@@ -358,15 +400,15 @@
         async function setRegistrationStatus(status) {
             showLoader();
             try {
-                await updateDoc(doc(db, "stat2_config", "session"), { isRegistrationOpen: status });
+                await db.collection("stat2_config").doc("session").update({ isRegistrationOpen: status });
                 showMessageModal('نجاح', `تم ${status ? 'فتح' : 'إغلاق'} التسجيل.`);
-            } catch (error) { console.error(error); }
+            } catch (error) { console.error(error); showMessageModal('خطأ', 'فشل تحديث حالة التسجيل.');}
             finally { hideLoader(); }
         }
 
         adminLoginBtn.addEventListener('click', () => loginModal.classList.remove('hidden'));
         document.getElementById('cancel-login-btn').addEventListener('click', () => loginModal.classList.add('hidden'));
-        logoutBtn.addEventListener('click', () => signOut(auth));
+        logoutBtn.addEventListener('click', () => auth.signOut());
         viewAttendanceBtn.addEventListener('click', () => viewAttendanceModal.classList.remove('hidden'));
         document.getElementById('close-view-btn').addEventListener('click', closeAllModals);
         document.getElementById('open-reg-btn').addEventListener('click', () => setRegistrationStatus(true));
@@ -383,15 +425,15 @@
             const selectedSession = document.getElementById('session-selector').value;
             showLoader();
             try {
-                await updateDoc(doc(db, "stat2_config", "session"), { activeKey: selectedSession });
+                await db.collection("stat2_config").doc("session").update({ activeKey: selectedSession });
                 showMessageModal('نجاح', `تم تحديد الجلسة الحالية إلى: ${selectedSession.replace(/_/g, ' ')}`);
-            } catch (error) { console.error(error); } 
+            } catch (error) { console.error(error); showMessageModal('خطأ', 'فشل تحديد الجلسة.');} 
             finally { hideLoader(); }
         });
 
         document.getElementById('google-login-btn').addEventListener('click', async () => {
             const provider = new GoogleAuthProvider();
-            try { await signInWithPopup(auth, provider); } 
+            try { await auth.signInWithPopup(provider); } 
             catch (error) { document.getElementById('login-error').classList.remove('hidden'); }
         });
 
@@ -413,31 +455,32 @@
             XLSX.writeFile(workbook, 'كشف_درجات_احصاء2.xlsx');
         });
 
-        onAuthStateChanged(auth, (user) => {
+        auth.onAuthStateChanged((user) => {
             if (user) {
-                const authorizedAdmins = ['nadembadrs2@gmail.com', 'dr.sayed.666@gmail.com'];
-                const isAuthorizedAdmin = user.email && authorizedAdmins.includes(user.email.toLowerCase());
+                const isAuthorizedAdmin = user.email && ['nadembadrs2@gmail.com', 'dr.sayed.666@gmail.com'].includes(user.email.toLowerCase());
                 
                 if (user.email && !isAuthorizedAdmin) {
-                    signOut(auth);
+                    auth.signOut();
                     document.getElementById('login-modal').classList.remove('hidden');
                     document.getElementById('login-error').classList.remove('hidden');
                     return; 
                 }
+                
                 appScreen.classList.remove('hidden');
                 appScreen.classList.add('flex');
                 loginModal.classList.add('hidden');
                 updateUIAfterAuthStateChange(user);
+
                 if (!appScreen.classList.contains('initialized')) {
                     populateSessionSelector();
                     generateQRCode();
-                    initializeDataListeners();
+                    initializeConfigListener();
                     appScreen.classList.add('initialized');
                 }
                 hideLoader();
             } else {
                 showLoader();
-                signInAnonymously(auth).catch(error => { console.error(error); hideLoader(); });
+                auth.signInAnonymously().catch(error => { console.error(error); hideLoader(); });
             }
         });
     });

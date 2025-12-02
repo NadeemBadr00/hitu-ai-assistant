@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>دوري الألعاب الفردية | تسجيل</title>
+    
+    <!-- 
+    ******************************************************************
+    * الأكواد المضافة (Analytics, AdSense, Social Share)
+    ******************************************************************
+    -->
+
+    <!-- Favicon -->
+    <link rel="icon" href="logo.png" type="image/png">
+
+    <!-- Social Media Share (Open Graph / Facebook / WhatsApp) -->
+    <!-- !! انتبه: قم بتغيير 'https-your-website-url.com' إلى الرابط الفعلي لموقعك !! -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://ai4roadmap.com/">
+    <meta property="og:title" content="دوري الألعاب الفردية | تسجيل">
+    <meta property="og:description" content="نظام تسجيل للمشاركة في دوري الألعاب الفردية (شطرنج وتنس طاولة).">
+    <meta property="og:image" content="https://ai4roadmap.com/logo.png">
+    <meta property="og:image:width" content="512">
+    <meta property="og:image:height" content="512">
+
+    <!-- Social Media Share (Twitter) -->
+    <!-- !! انتبه: قم بتغيير 'https-your-website-url.com' إلى الرابط الفعلي لموقعك !! -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://ai4roadmap.com/">
+    <meta property="twitter:title" content="دوري الألعاب الفردية | تسجيل">
+    <meta property="twitter:description" content="نظام تسجيل للمشاركة في دوري الألعاب الفردية (شطرنج وتنس طاولة).">
+    <meta property="twitter:image" content="https://ai4roadmap.com/logo.png">
+
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-4TENK8FGB1"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-4TENK8FGB1');
+    </script>
+
+    <!-- Google AdSense -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4896673999031703"
+         crossorigin="anonymous"></script>
+
+    <!-- 
+    ******************************************************************
+    * نهاية الأكواد المضافة
+    ******************************************************************
+    -->
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- XLSX Library for Excel Export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
+    <!-- Google Font (Cairo) -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body { font-family: 'Cairo', sans-serif; background-color: #f1f5f9; }
+        .modal-backdrop { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.3); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); display: flex; justify-content: center; align-items: center; z-index: 50; transition: opacity 0.3s ease-in-out; }
+        .modal-backdrop.hidden { opacity: 0; pointer-events: none; }
+        .rtl-input::placeholder { text-align: right; }
+        .loader {
+            border: 5px solid #f3f3f3; border-radius: 50%; border-top: 5px solid #3498db;
+            width: 50px; height: 50px; animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        button:disabled { opacity: 0.7; cursor: not-allowed; }
+        
+        /* Custom styles for player cards */
+        .player-card {
+            background-color: white;
+            border-radius: 0.75rem; /* 12px */
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            padding: 1rem; /* 16px */
+            display: flex;
+            align-items: center;
+            gap: 0.75rem; /* 12px */
+            transition: all 0.2s ease-in-out;
+        }
+        .player-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .player-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+        .avatar-male { background-color: #3b82f6; } /* blue-500 */
+        .avatar-female { background-color: #ec4899; } /* pink-500 */
+    </style>
+</head>
+<body class="bg-slate-100 flex flex-col min-h-screen">
+    <!-- Loader -->
+    <div id="loader-overlay" class="modal-backdrop"><div class="loader"></div></div>
+
+    <!-- Modals -->
+    <div id="login-modal" class="modal-backdrop hidden">
+        <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-sm text-center">
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">تسجيل الدخول (للإدارة)</h1>
+            <p class="text-gray-500 mb-6">الرجاء تسجيل الدخول بحساب Google للمتابعة.</p>
+            <button id="google-login-btn" class="w-full flex items-center justify-center gap-3 bg-white border border-gray-300 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-50 transition">
+                <svg class="w-6 h-6" viewBox="0 0 48 48"><defs><path id="a" d="M44.5 20H24v8.5h11.8C34.7 33.9 30.1 37 24 37c-7.2 0-13-5.8-13-13s5.8-13 13-13c3.1 0 5.9 1.1 8.1 2.9l6.4-6.4C34.6 4.1 29.6 2 24 2 11.8 2 2 11.8 2 24s9.8 22 22 22c11 0 21-8 21-22 0-1.3-.2-2.7-.5-4z"/></defs><clipPath id="b"><use xlink:href="#a" overflow="visible"/></clipPath><path clip-path="url(#b)" fill="#FBBC05" d="M0 37V11l17 13z"/><path clip-path="url(#b)" fill="#EA4335" d="M0 11l17 13 7-6.1L48 14V0H0z"/><path clip-path="url(#b)" fill="#34A853" d="M0 37l30-23.1 7.9 5.2L48 37H0z"/><path clip-path="url(#b)" fill="#4285F4" d="M48 48L17 24l-4-3 35-10z"/></svg>
+                <span>تسجيل الدخول باستخدام Google</span>
+            </button>
+            <button type="button" id="cancel-login-btn" class="w-full mt-4 bg-gray-200 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-300 transition">إلغاء</button>
+            <p id="login-error" class="text-red-500 mt-4 text-sm hidden">هذا الحساب غير مصرح له بالدخول كمسؤول.</p>
+        </div>
+    </div>
+        
+    <div id="registration-modal" class="modal-backdrop hidden">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg m-4 flex flex-col" style="max-height: 90vh;">
+            <div class="p-6 border-b border-gray-200">
+                <h2 id="modal-title" class="text-2xl font-bold text-gray-800">تسجيل لاعب جديد</h2>
+            </div>
+            
+            <div class="p-6 overflow-y-auto">
+                <form id="registration-form" novalidate>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                        <input required type="text" id="player-name" placeholder="الاسم الثلاثي" class="rtl-input w-full p-3 border border-gray-300 rounded-lg col-span-full">
+                        
+                        <div class="relative">
+                            <input required type="tel" id="player-mobile" placeholder="رقم الموبايل" class="rtl-input w-full p-3 border border-gray-300 rounded-lg">
+                            <p id="mobile-error" class="text-red-500 text-xs mt-1 hidden">رقم الموبايل غير صحيح (11 رقم يبدأ بـ 01).</p>
+                        </div>
+                        
+                        <div class="relative">
+                             <input required type="text" id="player-national-id" placeholder="الرقم القومي (14 رقم)" maxlength="14" class="rtl-input w-full p-3 border border-gray-300 rounded-lg">
+                             <p id="national-id-error" class="text-red-500 text-xs mt-1 hidden">الرقم القومي يجب أن يتكون من 14 رقم.</p>
+                        </div>
+
+                        <select required id="player-game" class="w-full p-3 border border-gray-300 rounded-lg bg-white">
+                            <option value="" disabled selected>-- اختر اللعبة --</option>
+                            <option value="chess">شطرنج</option>
+                            <option value="pingpong">تنس طاولة (بينج بونج)</option>
+                        </select>
+
+                        <select required id="player-gender" class="w-full p-3 border border-gray-300 rounded-lg bg-white">
+                            <option value="" disabled selected>-- اختر الجنس --</option>
+                            <option value="male">ذكر</option>
+                            <option value="female">أنثى</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+
+            <div class="p-6 bg-gray-50 border-t border-gray-200 flex justify-end gap-3">
+                <button type="button" id="cancel-reg-btn" class="bg-gray-200 text-gray-700 px-6 py-2 rounded-lg font-semibold hover:bg-gray-300 transition">إلغاء</button>
+                <button type="submit" form="registration-form" id="form-submit-btn" class="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition">تسجيل</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="view-players-modal" class="modal-backdrop hidden">
+         <div class="bg-white rounded-2xl shadow-xl w-full max-w-5xl m-4 flex flex-col" style="max-height: 90vh;">
+            <div class="p-6 border-b border-gray-200"><h2 id="view-modal-title" class="text-2xl font-bold text-gray-800">اللاعبون المسجلون</h2></div>
+            <div class="p-6 overflow-y-auto">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">اسم اللاعب</th>
+                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">الموبايل</th>
+                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">الرقم القومي</th>
+                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">اللعبة</th>
+                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">الجنس</th>
+                                <th class="px-6 py-3"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="players-table-body" class="bg-white divide-y divide-gray-200"></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="p-4 bg-gray-50 border-t border-gray-200 flex justify-end"><button type="button" id="close-view-btn" class="bg-gray-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-gray-700 transition">إغلاق</button></div>
+        </div>
+    </div>
+
+    <div id="message-modal" class="modal-backdrop hidden">
+        <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-sm text-center">
+            <h2 id="message-modal-title" class="text-2xl font-bold text-gray-800 mb-4"></h2>
+            <p id="message-modal-body" class="text-gray-600 mb-6"></p>
+            <div id="message-modal-actions" class="flex justify-center gap-3"></div>
+        </div>
+    </div>
+    
+    <!-- New Query Modal -->
+    <div id="query-modal" class="modal-backdrop hidden">
+        <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-lg">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">الاستعلام عن التسجيل</h2>
+            
+            <!-- Search View -->
+            <div id="query-search-view">
+                <p class="text-gray-600 mb-4 text-center">أدخل رقمك القومي لعرض أو حذف تسجيلك.</p>
+                <form id="query-form">
+                    <input type="text" id="query-national-id" placeholder="الرقم القومي (14 رقم)" maxlength="14" class="w-full px-4 py-3 border border-gray-300 rounded-lg mb-4 text-center">
+                    <p id="query-national-id-error" class="text-red-500 text-xs mb-4 text-center hidden">الرقم القومي المدخل غير صحيح (14 رقم).</p>
+                    <div class="flex gap-3">
+                        <button type="button" id="cancel-query-btn" class="flex-1 bg-gray-200 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-300">إلغاء</button>
+                        <button type="submit" class="flex-1 bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700">بحث</button>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- Result View -->
+            <div id="query-result-view" class="hidden">
+                 <h3 class="text-xl font-bold text-gray-800 mb-4 text-center">بيانات تسجيلك</h3>
+                 <div id="query-result-details" class="space-y-3 mb-6 border-r-4 border-indigo-500 pr-4 text-right"></div>
+                 <div class="flex justify-center gap-4 flex-wrap">
+                      <button id="delete-self-reg-btn" class="bg-red-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-red-700">حذف التسجيل</button>
+                 </div>
+                 <button id="back-to-query-search" class="mt-4 text-sm text-indigo-600 hover:underline w-full text-center">بحث برقم آخر</button>
+            </div>
+            <p id="query-error" class="text-red-500 mt-4 text-sm hidden text-center">الرقم القومي هذا غير مسجل.</p>
+        </div>
+    </div>
+
+    <!-- Main App Screen -->
+    <div id="app-screen" class="hidden flex-grow flex-col">
+        <header class="bg-white shadow-md sticky top-0 z-40">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center flex-wrap gap-4">
+                <div class="flex items-center gap-3">
+                    <img src="logo.png" alt="Logo" class="h-12 w-12 rounded-full">
+                    <h1 class="text-xl sm:text-2xl font-bold text-gray-800">دوري الألعاب الفردية</h1>
+                </div>
+                <div id="header-buttons" class="flex items-center gap-2 sm:gap-3">
+                    <button id="query-reg-btn" class="bg-indigo-600 text-white px-4 sm:px-6 py-2 rounded-lg font-semibold hover:bg-indigo-700 transition text-sm sm:text-base">الاستعلام عن التسجيل</button>
+                    <button id="admin-login-btn" class="bg-gray-800 text-white px-4 sm:px-6 py-2 rounded-lg font-semibold hover:bg-gray-900 transition text-sm sm:text-base">تسجيل الدخول</button>
+                    <!-- Admin specific buttons -->
+                    <button id="view-players-btn" class="bg-teal-600 text-white px-4 sm:px-6 py-2 rounded-lg font-semibold hover:bg-teal-700 transition hidden text-sm sm:text-base">عرض المسجلين (إدارة)</button>
+                    <button id="export-excel-btn" class="bg-green-600 text-white px-4 sm:px-6 py-2 rounded-lg font-semibold hover:bg-green-700 transition flex items-center gap-2 hidden text-sm sm:text-base">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                        <span>تصدير البيانات</span>
+                    </button>
+                    <button id="logout-btn" class="bg-red-600 text-white px-4 sm:px-6 py-2 rounded-lg font-semibold hover:bg-red-700 transition hidden text-sm sm:text-base">خروج</button>
+                </div>
+            </div>
+        </header>
+        
+        <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow">
+            <div class="bg-white rounded-xl shadow-lg p-6 text-center mb-12">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">مرحباً بكم في دوري الألعاب الفردية</h2>
+                
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-lg text-gray-600 py-4">
+                    <div class="text-center p-2 rounded-lg bg-slate-50">
+                        <span class="block text-sm">شطرنج (رجال)</span>
+                        <span id="chess-male-count" class="font-bold text-blue-600 text-4xl">0</span>
+                    </div>
+                    <div class="text-center p-2 rounded-lg bg-slate-50">
+                        <span class="block text-sm">شطرنج (سيدات)</span>
+                        <span id="chess-female-count" class="font-bold text-pink-500 text-4xl">0</span>
+                    </div>
+                    <div class="text-center p-2 rounded-lg bg-slate-50">
+                        <span class="block text-sm">تنس طاولة (رجال)</span>
+                        <span id="pingpong-male-count" class="font-bold text-blue-600 text-4xl">0</span>
+                    </div>
+                    <div class="text-center p-2 rounded-lg bg-slate-50">
+                        <span class="block text-sm">تنس طاولة (سيدات)</span>
+                        <span id="pingpong-female-count" class="font-bold text-pink-500 text-4xl">0</span>
+                    </div>
+                </div>
+                
+                <div class="mt-8">
+                    <button id="add-player-btn" class="text-white px-8 py-3 rounded-lg font-semibold transition bg-blue-600 hover:bg-blue-700 text-lg">
+                        <svg class="inline-block w-6 h-6 -mt-1 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+                        <span>سجل اسمك الآن</span>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Display Areas -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                
+                <!-- Chess Column -->
+                <section>
+                    <h3 class="text-2xl font-bold text-gray-800 mb-6 text-center border-b pb-4">
+                        <span class="text-indigo-600">♟️</span> الشطرنج
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="font-semibold text-lg text-center mb-4">مسابقة الرجال</h4>
+                            <div id="chess-male-list" class="space-y-3">
+                                <p class="text-center text-gray-500 py-4">لم يسجل أحد بعد.</p>
+                            </div>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-lg text-center mb-4">مسابقة السيدات</h4>
+                            <div id="chess-female-list" class="space-y-3">
+                               <p class="text-center text-gray-500 py-4">لم تسجل إحداهن بعد.</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- Ping Pong Column -->
+                <section>
+                    <h3 class="text-2xl font-bold text-gray-800 mb-6 text-center border-b pb-4">
+                        <span class="text-indigo-600">🏓</span> تنس الطاولة
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="font-semibold text-lg text-center mb-4">مسابقة الرجال</h4>
+                            <div id="pingpong-male-list" class="space-y-3">
+                                <p class="text-center text-gray-500 py-4">لم يسجل أحد بعد.</p>
+                            </div>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-lg text-center mb-4">مسابقة السيدات</h4>
+                            <div id="pingpong-female-list" class="space-y-3">
+                               <p class="text-center text-gray-500 py-4">لم تسجل إحداهن بعد.</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                
+            </div>
+        </main>
+        
+        <footer class="bg-gray-800 text-white text-center mt-12">
+            <div class="container mx-auto px-4 py-8">
+                <p class="font-bold text-xl mb-6">تحت إشراف رعاية الشباب واتحاد الطلاب</p>
+            </div>
+            <div class="bg-gray-900 py-4">
+                <div class="container mx-auto px-4">
+                    <p class="text-gray-400 text-sm">الموقع من تصميم نديم بدر ليدر ذكاء اصطناعي الفرقة التالتة</p>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Firebase SDKs (v8 style, compatible with Firebase Hosting) -->
+    <script src="/__/firebase/8.10.1/firebase-app.js"></script>
+    <script src="/__/firebase/8.10.1/firebase-auth.js"></script>
+    <script src="/__/firebase/8.10.1/firebase-firestore.js"></script>
+    <!-- This init.js file is provided by Firebase Hosting -->
+    <script src="/__/firebase/init.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- Check if Firebase is initialized by init.js ---
+            if (typeof firebase === 'undefined' || !firebase.app()) {
+                document.getElementById('loader-overlay').classList.add('hidden'); // Hide loader
+                const appScreen = document.getElementById('app-screen');
+                appScreen.innerHTML = `
+                    <div class="container mx-auto p-8 mt-10">
+                        <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-6 rounded-lg shadow-md max-w-2xl mx-auto">
+                            <h2 class="font-bold text-2xl mb-3">خطأ فادح في الإعداد</h2>
+                            <p class="text-lg">لا يمكن العثور على إعدادات Firebase.</p>
+                            <p class="mt-2">هذا التطبيق مصمم للعمل على "Firebase Hosting" ويتوقع ملف <code>/__/firebase/init.js</code>. تأكد من أنك قمت بنشر التطبيق أو أنك تستخدم <code>firebase serve</code>.</p>
+                        </div>
+                    </div>
+                `;
+                appScreen.classList.remove('hidden'); // Show error message
+                throw new Error("Firebase is not initialized. Make sure you are on Firebase Hosting or using the emulator.");
+            }
+
+            // --- Initialize Firebase (v8 namespaced) ---
+            const auth = firebase.auth();
+            const db = firebase.firestore();
+            const provider = new firebase.auth.GoogleAuthProvider();
+            const serverTimestamp = firebase.firestore.FieldValue.serverTimestamp;
+            
+            // Enable debug logging
+            firebase.setLogLevel('debug');
+
+            // --- DOM Elements ---
+            const loaderOverlay = document.getElementById('loader-overlay');
+            const appScreen = document.getElementById('app-screen');
+            const loginModal = document.getElementById('login-modal');
+            const registrationModal = document.getElementById('registration-modal');
+            const viewPlayersModal = document.getElementById('view-players-modal');
+            const messageModal = document.getElementById('message-modal');
+            const queryModal = document.getElementById('query-modal');
+
+            // --- Buttons ---
+            const adminLoginBtn = document.getElementById('admin-login-btn');
+            const googleLoginBtn = document.getElementById('google-login-btn');
+            const logoutBtn = document.getElementById('logout-btn');
+            const exportExcelBtn = document.getElementById('export-excel-btn');
+            const viewPlayersBtn = document.getElementById('view-players-btn');
+            const addPlayerBtn = document.getElementById('add-player-btn');
+            const queryRegBtn = document.getElementById('query-reg-btn');
+
+            // --- Forms & Inputs ---
+            const registrationForm = document.getElementById('registration-form');
+            const queryForm = document.getElementById('query-form');
+
+            // --- App State ---
+            let allPlayers = [];
+            let isAdminLoggedIn = false;
+            let currentUser = null;
+            let unsubscribePlayers = null; 
+            
+            const ADMIN_EMAILS = ['nadembadrs2@gmail.com', 'dr.sayed.666@gmail.com'];
+
+            // --- Utility Functions ---
+            const sanitizeHTML = (str) => {
+                const temp = document.createElement('div');
+                temp.textContent = str;
+                return temp.innerHTML;
+            };
+
+            const showLoader = () => loaderOverlay.classList.remove('hidden');
+            const hideLoader = () => loaderOverlay.classList.add('hidden');
+            const closeAllModals = () => {
+                document.querySelectorAll('.modal-backdrop').forEach(modal => modal.classList.add('hidden'));
+            }
+
+            function showMessageModal(title, body, actions = null) {
+                document.getElementById('message-modal-title').textContent = title;
+                document.getElementById('message-modal-body').innerHTML = body;
+                const actionsContainer = document.getElementById('message-modal-actions');
+                actionsContainer.innerHTML = ''; 
+                
+                if (actions && actions.length > 0) {
+                    actions.forEach(action => {
+                        const button = document.createElement('button');
+                        button.textContent = action.text;
+                        button.className = action.class;
+                        if (action.callback) button.onclick = action.callback;
+                        actionsContainer.appendChild(button);
+                    });
+                } else {
+                    actionsContainer.innerHTML = `<button class="bg-blue-600 text-white px-8 py-2 rounded-lg font-semibold hover:bg-blue-700 transition">حسنًا</button>`;
+                    actionsContainer.firstChild.onclick = closeAllModals;
+                }
+                messageModal.classList.remove('hidden');
+            }
+            
+            // --- Core App Logic ---
+
+            /**
+             * Renders a list of players to a specific container.
+             */
+            function renderListToUI(players, elementId) {
+                const container = document.getElementById(elementId);
+                container.innerHTML = ''; // Clear previous content
+                
+                if (players.length === 0) {
+                    const lang = elementId.includes('female') ? 'تسجل إحداهن' : 'يسجل أحد';
+                    container.innerHTML = `<p class="text-center text-gray-500 py-4">لم ${lang} بعد.</p>`;
+                    return;
+                }
+                
+                players.forEach(player => {
+                    const avatarChar = player.playerName.charAt(0).toUpperCase() || '?';
+                    const avatarClass = player.gender === 'male' ? 'avatar-male' : 'avatar-female';
+                    
+                    const cardHTML = `
+                        <div class="player-card">
+                            <div class="player-avatar ${avatarClass}">
+                                ${sanitizeHTML(avatarChar)}
+                            </div>
+                            <div>
+                                <p class="font-semibold text-gray-800">${sanitizeHTML(player.playerName)}</p>
+                            </div>
+                        </div>
+                    `;
+                    container.insertAdjacentHTML('beforeend', cardHTML);
+                });
+            }
+
+            /**
+             * Filters all players and updates all UI lists and counters.
+             */
+            function renderAllPlayerLists() {
+                const chessMale = allPlayers.filter(p => p.game === 'chess' && p.gender === 'male');
+                const chessFemale = allPlayers.filter(p => p.game === 'chess' && p.gender === 'female');
+                const pingpongMale = allPlayers.filter(p => p.game === 'pingpong' && p.gender === 'male');
+                const pingpongFemale = allPlayers.filter(p => p.game === 'pingpong' && p.gender === 'female');
+                
+                document.getElementById('chess-male-count').textContent = chessMale.length;
+                document.getElementById('chess-female-count').textContent = chessFemale.length;
+                document.getElementById('pingpong-male-count').textContent = pingpongMale.length;
+                document.getElementById('pingpong-female-count').textContent = pingpongFemale.length;
+                
+                renderListToUI(chessMale, 'chess-male-list');
+                renderListToUI(chessFemale, 'chess-female-list');
+                renderListToUI(pingpongMale, 'pingpong-male-list');
+                renderListToUI(pingpongFemale, 'pingpong-female-list');
+            }
+
+            /**
+             * Attaches the live listener to the players collection.
+             */
+            function initializeDataListeners() {
+                console.log("Initializing data listeners...");
+                // Ensure we don't attach multiple listeners
+                if (unsubscribePlayers) {
+                    unsubscribePlayers();
+                }
+                
+                const playersCollectionRef = db.collection("individual_registrations");
+                const q = playersCollectionRef.orderBy("createdAt", "desc");
+                
+                unsubscribePlayers = q.onSnapshot((snapshot) => {
+                    allPlayers = snapshot.docs.map(doc => ({ ...doc.data(), docId: doc.id }));
+                    console.log(`Fetched ${allPlayers.length} players.`);
+                    renderAllPlayerLists();
+                }, (error) => {
+                    console.error("Error listening to players collection: ", error);
+                    showMessageModal('خطأ فادح', 'خطأ في تحميل بيانات اللاعبين. حاول تحديث الصفحة.');
+                });
+            }
+            
+            /**
+             * Finds a single player document by their National ID.
+             */
+            async function findPlayerByNationalId(nationalId) {
+                const ref = db.collection("individual_registrations");
+                const q = ref.where("playerNationalId", "==", nationalId).limit(1);
+                const snapshot = await q.get();
+                if (!snapshot.empty) {
+                    const doc = snapshot.docs[0];
+                    return { found: true, docId: doc.id, data: doc.data() };
+                }
+                return { found: false };
+            }
+
+            /**
+             * Updates UI based on authentication state.
+             */
+            function updateUIAfterAuthStateChange(user) {
+                currentUser = user; 
+                const isUserLoggedIn = !!(user && !user.isAnonymous);
+                isAdminLoggedIn = isUserLoggedIn && user.email && ADMIN_EMAILS.includes(user.email.toLowerCase());
+                
+                console.log(`Auth state changed. User: ${user?.uid}, Admin: ${isAdminLoggedIn}`);
+
+                adminLoginBtn.classList.toggle('hidden', isUserLoggedIn);
+                logoutBtn.classList.toggle('hidden', !isUserLoggedIn);
+                exportExcelBtn.classList.toggle('hidden', !isAdminLoggedIn);
+                viewPlayersBtn.classList.toggle('hidden', !isAdminLoggedIn);
+            }
+            
+            /**
+             * Handles the player registration form submission.
+             */
+            async function handleRegistrationSubmit(e) {
+                e.preventDefault();
+                
+                if (!registrationForm.checkValidity()) {
+                    showMessageModal('خطأ', 'الرجاء ملء جميع الحقول المطلوبة.');
+                    registrationForm.reportValidity(); 
+                    return;
+                }
+                
+                const submitBtn = document.getElementById('form-submit-btn');
+                submitBtn.disabled = true;
+
+                const mobileInput = document.getElementById('player-mobile');
+                const nationalIdInput = document.getElementById('player-national-id');
+                let isValid = true;
+                
+                // Validate Mobile
+                if (!/^01[0125][0-9]{8}$/.test(mobileInput.value)) {
+                    document.getElementById('mobile-error').classList.remove('hidden'); isValid = false;
+                } else { document.getElementById('mobile-error').classList.add('hidden'); }
+                
+                // Validate National ID
+                if (!/^\d{14}$/.test(nationalIdInput.value)) {
+                    document.getElementById('national-id-error').classList.remove('hidden'); isValid = false;
+                } else { document.getElementById('national-id-error').classList.add('hidden'); }
+                
+                if(!isValid) { 
+                    submitBtn.disabled = false; 
+                    return; 
+                }
+                
+                showLoader();
+                
+                const playerData = {
+                    playerName: document.getElementById('player-name').value.trim(),
+                    playerMobile: mobileInput.value,
+                    playerNationalId: nationalIdInput.value,
+                    game: document.getElementById('player-game').value,
+                    gender: document.getElementById('player-gender').value,
+                };
+                
+                try {
+                    // Check if National ID already exists
+                    const playersRef = db.collection("individual_registrations");
+                    const q = playersRef.where("playerNationalId", "==", playerData.playerNationalId);
+                    const querySnapshot = await q.get();
+                    
+                    if (!querySnapshot.empty) {
+                        showMessageModal('خطأ', 'هذا الرقم القومي مسجل بالفعل.');
+                        hideLoader(); 
+                        submitBtn.disabled = false; 
+                        return;
+                    }
+                    
+                    // Add new player document
+                    playerData.createdAt = serverTimestamp();
+                    await playersRef.add(playerData);
+                    
+                    showMessageModal('تسجيل ناجح!', `تم تسجيل اللاعب "${sanitizeHTML(playerData.playerName)}" بنجاح.`);
+                    closeAllModals();
+                    
+                } catch (error) {
+                    console.error("Error during registration:", error);
+                    showMessageModal('خطأ', `حدث خطأ أثناء حفظ البيانات. ${error.message}`);
+                } finally {
+                    hideLoader(); 
+                    submitBtn.disabled = false;
+                }
+            }
+            
+            /**
+             * (Admin) Deletes a player after confirmation.
+             */
+            async function performPlayerDelete(docId) {
+                if (!isAdminLoggedIn) {
+                    showMessageModal('خطأ', 'ليس لديك صلاحيات الحذف.');
+                    return;
+                }
+                
+                showLoader();
+                try {
+                    const playerDocRef = db.collection("individual_registrations").doc(docId);
+                    await playerDocRef.delete();
+                    showMessageModal('نجاح', 'تم حذف اللاعب بنجاح.');
+                } catch (error) {
+                    console.error("Error deleting player:", error);
+                    showMessageModal('خطأ', 'حدث خطأ أثناء الحذف.');
+                } finally {
+                    hideLoader();
+                    closeAllModals();
+                }
+            }
+
+            /**
+             * (User) Deletes their own registration after confirmation.
+             */
+            async function performSelfDelete(docId) {
+                // No admin check needed here, as it's triggered after a successful ID query
+                showLoader();
+                try {
+                    const playerDocRef = db.collection("individual_registrations").doc(docId);
+                    await playerDocRef.delete();
+                    showMessageModal('نجاح', 'تم حذف تسجيلك بنجاح.');
+                } catch (error) {
+                    console.error("Error deleting own registration:", error);
+                    showMessageModal('خطأ', 'حدث خطأ أثناء الحذف.');
+                } finally {
+                    hideLoader();
+                    closeAllModals();
+                }
+            }
+
+            /**
+             * (Admin) Opens the modal to view all registered players in a table.
+             */
+            function handleViewPlayersClick() {
+                const tableBody = document.getElementById('players-table-body');
+                document.getElementById('view-modal-title').textContent = `اللاعبون المسجلون (${allPlayers.length})`;
+                tableBody.innerHTML = ''; 
+                
+                if (allPlayers.length === 0) {
+                    tableBody.innerHTML = `<tr><td colspan="6" class="text-center py-10 text-gray-500">لا يوجد لاعبون مسجلون حالياً.</td></tr>`;
+                } else {
+                    // Sort players by game then name
+                    const sortedPlayers = [...allPlayers].sort((a, b) => {
+                        if (a.game < b.game) return -1;
+                        if (a.game > b.game) return 1;
+                        if (a.playerName < b.playerName) return -1;
+                        if (a.playerName > b.playerName) return 1;
+                        return 0;
+                    });
+                    
+                    sortedPlayers.forEach(player => {
+                        const row = tableBody.insertRow();
+                        const gameText = player.game === 'chess' ? 'شطرنج' : 'تنس طاولة';
+                        const genderText = player.gender === 'male' ? 'ذكر' : 'أنثى';
+                        
+                        row.innerHTML = `
+                            <td class="px-6 py-4 whitespace-nowrap">${sanitizeHTML(player.playerName)}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">${sanitizeHTML(player.playerMobile)}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">${sanitizeHTML(player.playerNationalId)}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">${gameText}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">${genderText}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-left">
+                                <button data-doc-id="${player.docId}" class="delete-player-btn text-red-600 hover:text-red-900">حذف</button>
+                            </td>
+                        `;
+                    });
+                }
+
+                viewPlayersModal.classList.remove('hidden');
+                
+                // Add event listeners to delete buttons
+                document.querySelectorAll('.delete-player-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const docId = e.currentTarget.dataset.docId;
+                        showMessageModal('تأكيد الحذف', 'هل أنت متأكد من حذف هذا اللاعب؟', [
+                            { text: 'إلغاء', class: 'flex-1 bg-gray-200 text-gray-800 px-6 py-2 rounded-lg font-semibold hover:bg-gray-300', callback: closeAllModals },
+                            { text: 'تأكيد الحذف', class: 'flex-1 bg-red-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-red-700', callback: () => performPlayerDelete(docId) }
+                        ]);
+                    });
+                });
+            }
+            
+            /**
+             * (Admin) Exports all player data to an Excel file.
+             */
+            function handleExportClick() {
+                if (allPlayers.length === 0) { 
+                    showMessageModal('تنبيه', 'لا يوجد بيانات لتصديرها.'); 
+                    return; 
+                }
+                
+                const dataToExport = allPlayers.map(p => ({
+                    'اسم اللاعب': p.playerName,
+                    'رقم الموبايل': p.playerMobile,
+                    'الرقم القومي': p.playerNationalId,
+                    'اللعبة': p.game === 'chess' ? 'شطرنج' : 'تنس طاولة',
+                    'الجنس': p.gender === 'male' ? 'ذكر' : 'أنثى',
+                    'تاريخ التسجيل': p.createdAt?.toDate ? p.createdAt.toDate().toLocaleString('ar-EG') : 'غير متاح'
+                }));
+
+                const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+                const workbook = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(workbook, worksheet, 'بيانات اللاعبين');
+                
+                // Set column widths
+                worksheet['!cols'] = [ { wch: 25 }, { wch: 15 }, { wch: 20 }, { wch: 15 }, { wch: 10 }, { wch: 20 } ];
+                
+                XLSX.writeFile(workbook, 'كشف_اللاعبين_المسجلين.xlsx');
+            }
+
+            // --- Event Listeners Setup ---
+            
+            // Modal close buttons
+            document.getElementById('cancel-login-btn').addEventListener('click', closeAllModals);
+            document.getElementById('cancel-reg-btn').addEventListener('click', closeAllModals);
+            document.getElementById('close-view-btn').addEventListener('click', closeAllModals);
+            document.getElementById('cancel-query-btn').addEventListener('click', closeAllModals);
+
+            // Main action buttons
+            addPlayerBtn.addEventListener('click', () => {
+                registrationForm.reset();
+                registrationModal.classList.remove('hidden');
+            });
+            
+            queryRegBtn.addEventListener('click', () => {
+                queryForm.reset();
+                document.getElementById('query-search-view').classList.remove('hidden');
+                document.getElementById('query-result-view').classList.add('hidden');
+                document.getElementById('query-error').classList.add('hidden');
+                document.getElementById('query-national-id-error').classList.add('hidden');
+                queryModal.classList.remove('hidden');
+            });
+
+            // Form submission
+            registrationForm.addEventListener('submit', handleRegistrationSubmit);
+
+            queryForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const submitBtn = e.currentTarget.querySelector('button[type="submit"]');
+                submitBtn.disabled = true;
+
+                const nationalIdRegex = /^\d{14}$/;
+                const idError = document.getElementById('query-national-id-error');
+                const nationalIdInput = document.getElementById('query-national-id');
+                
+                if (!nationalIdRegex.test(nationalIdInput.value)) { 
+                    idError.classList.remove('hidden'); 
+                    submitBtn.disabled = false; 
+                    return; 
+                }
+                idError.classList.add('hidden');
+                showLoader();
+                
+                try {
+                    const playerInfo = await findPlayerByNationalId(nationalIdInput.value);
+                    const searchView = document.getElementById('query-search-view');
+                    const resultView = document.getElementById('query-result-view');
+                    const errorMsg = document.getElementById('query-error');
+
+                    if (playerInfo.found) {
+                        searchView.classList.add('hidden');
+                        resultView.classList.remove('hidden');
+                        errorMsg.classList.add('hidden');
+                        
+                        const detailsContainer = document.getElementById('query-result-details');
+                        const gameText = playerInfo.data.game === 'chess' ? 'شطرنج' : 'تنس طاولة';
+                        const genderText = playerInfo.data.gender === 'male' ? 'ذكر' : 'أنثى';
+
+                        detailsContainer.innerHTML = `
+                            <p><strong>الاسم:</strong> ${sanitizeHTML(playerInfo.data.playerName)}</p>
+                            <p><strong>اللعبة:</strong> ${gameText}</p>
+                            <p><strong>الجنس:</strong> ${genderText}</p>
+                        `;
+                        
+                        const deleteBtn = document.getElementById('delete-self-reg-btn');
+                        deleteBtn.onclick = () => {
+                            showMessageModal('تأكيد الحذف', 'هل أنت متأكد من حذف تسجيلك؟', [
+                                { text: 'إلغاء', class: 'flex-1 bg-gray-200 text-gray-800 px-6 py-2 rounded-lg font-semibold hover:bg-gray-300', callback: closeAllModals },
+                                { text: 'تأكيد الحذف', class: 'flex-1 bg-red-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-red-700', callback: () => performSelfDelete(playerInfo.docId) }
+                            ]);
+                        };
+                        
+                    } else {
+                        errorMsg.classList.remove('hidden');
+                    }
+                } catch (error) {
+                    console.error("Error during query search:", error);
+                    showMessageModal('خطأ', 'حدث خطأ أثناء البحث.');
+                } finally {
+                    hideLoader();
+                    submitBtn.disabled = false;
+                }
+            });
+
+            document.getElementById('back-to-query-search').addEventListener('click', () => {
+                document.getElementById('query-search-view').classList.remove('hidden');
+                document.getElementById('query-result-view').classList.add('hidden');
+                document.getElementById('query-error').classList.add('hidden');
+                queryForm.reset();
+            });
+
+            // Admin buttons
+            adminLoginBtn.addEventListener('click', () => loginModal.classList.remove('hidden'));
+            viewPlayersBtn.addEventListener('click', handleViewPlayersClick);
+            exportExcelBtn.addEventListener('click', handleExportClick);
+            
+            logoutBtn.addEventListener('click', () => {
+                auth.signOut().catch(e => console.error("Sign out error", e));
+            });
+            
+            googleLoginBtn.addEventListener('click', async () => {
+                const loginError = document.getElementById('login-error');
+                loginError.classList.add('hidden');
+                try {
+                    const result = await auth.signInWithPopup(provider);
+                    if (!ADMIN_EMAILS.includes(result.user.email.toLowerCase())) {
+                        await auth.signOut();
+                        loginError.classList.remove('hidden');
+                    } else {
+                        closeAllModals();
+                    }
+                } catch (error) {
+                    console.error("Google Sign-In failed:", error);
+                    showMessageModal('خطأ', 'فشل تسجيل الدخول باستخدام Google. حاول مرة أخرى.');
+                }
+            });
+            
+            // --- App Start Logic (v8 style) ---
+            auth.onAuthStateChanged(async (user) => {
+                showLoader();
+                if (user) { 
+                    // User is signed in (either real or anonymous)
+                    updateUIAfterAuthStateChange(user);
+                    appScreen.classList.remove('hidden');
+                    appScreen.classList.add('flex');
+                    
+                    // Initialize data listener only once
+                    if (!appScreen.classList.contains('initialized')) {
+                        initializeDataListeners();
+                        appScreen.classList.add('initialized');
+                    }
+                    
+                    hideLoader();
+                } else { 
+                    // User is signed out, sign them in anonymously
+                    console.log("No user, signing in anonymously...");
+                    try {
+                        // This is the key change: just sign in anonymously.
+                        // Firebase Hosting's init.js will allow this.
+                        await auth.signInAnonymously();
+                        // onAuthStateChanged will be called again with the new user
+                    } catch (error) {
+                        console.error("Anonymous sign-in failed:", error);
+                        hideLoader();
+                        showMessageModal('خطأ فادح', 'لا يمكن الاتصال بالخادم. يرجى تحديث الصفحة.');
+                    }
+                }
+            });
+
+        }); // End DOMContentLoaded
+    </script>
+</body>
+</html>
+

@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- FINALIZED & FIXED: Content Security Policy -->
+    <meta http-equiv="Content-Security-Policy" content="
+        default-src 'none'; 
+        script-src 'self' https://apis.google.com https://www.googletagmanager.com https://pagead2.googlesyndication.com https://cdn.tailwindcss.com https://cdnjs.cloudflare.com 'sha256-1iu4tNLcrNxb8BDSZ6k2T25tJtFKwfI5pwQhyybh3Ww=' 'sha256-rYiEcb8NAe5Fr0h2saqT4JTO7g0xwnBPxmXalUMzgKk=' 'sha256-R2l9qF86TF/w/H7oaBTUoAn9plT4BT+KrbDTZ/XS0Kk=' 'sha256-+ydjYchXkins75FPNA3oemjRvKjJ4xi8CTFQmr1s+6c=' 'sha256-RZSkFbwPbZaegFljPpxn+D7Aoxeg1d6DX7b/6Y8mlLE=' 'sha256-tVTjp+0Wm/z42mR7NVsB345Xc7d+S2yxEQ3vnp1j3vk=' 'sha256-TvQ0uv1KCrEpIm5gqJFO4fEWG5IK0W6pIDkXJRmtL4g=' 'sha256-1zyWno4ItdbG3pXzaRyiXU0vtfQiXT/YosQykuhwGz4=' 'sha256-PZoP+QcXSSixYDgvXqpojXIQKgvNqBUYC92bzQn04uY=' 'sha256-jFAvel1sS0w0au1TGUPYVU4xo+HBp+1bNec/5s18B/c=' 'sha256-rR2VGN4CFf+EL5qfXWsrSh/KRfNbEjxyRCesjFX8HCA=';
+        style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+        img-src 'self' https://ai4roadmap.com https://placehold.co data: https://pagead2.googlesyndication.com;
+        font-src https://fonts.gstatic.com;
+        connect-src 'self' wss://*.firebaseio.com https://*.googleapis.com https://securetoken.googleapis.com https://www.google-analytics.com https://ep1.adtrafficquality.google;
+        frame-src 'self' https://*.google.com https://ai-roadmap-nadeem.firebaseapp.com https://googleads.g.doubleclick.net;
+        object-src 'none';
+        base-uri 'self';
+        form-action 'self';
+    ">
+
+    <title>دوري كرة القدم | تسجيل الفرق</title>
+
+    <!-- Favicon and Social Media Meta Tags -->
+    <link rel="icon" href="https://ai4roadmap.com/logo.png" type="image/png">
+    
+    <meta name="description" content="نظام تسجيل الفرق للمشاركة في دوري كرة القدم.">
+    <meta name="keywords" content="دوري كرة القدم, تسجيل فرق, بطولة">
+    
+    <!-- Open Graph / Facebook / WhatsApp -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://ai4roadmap.com/">
+    <meta property="og:title" content="دوري كرة القدم | التسجيل مفتوح الآن">
+    <meta property="og:description" content="نظام تسجيل الفرق للمشاركة في دوري كرة القدم.">
+    <meta property="og:image" content="https://ai4roadmap.com/logo.png">
+    <meta property="og:image:width" content="512">
+    <meta property="og:image:height" content="512">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://ai4roadmap.com/">
+    <meta property="twitter:title" content="دوري كرة القدم | التسجيل مفتوح الآن">
+    <meta property="twitter:description" content="نظام تسجيل الفرق للمشاركة في دوري كرة القدم.">
+    <meta property="twitter:image" content="https://ai4roadmap.com/logo.png">
+
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-4TENK8FGB1"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-4TENK8FGB1');
+        </script>
+
+
+    <!-- Google AdSense -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4896673999031703"
+     crossorigin="anonymous"></script>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Cairo', sans-serif; background-color: #f1f5f9; }
+        .modal-backdrop { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.3); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); display: flex; justify-content: center; align-items: center; z-index: 50; transition: opacity 0.3s ease-in-out; }
+        .modal-backdrop.hidden { opacity: 0; pointer-events: none; }
+        .rtl-input::placeholder { text-align: right; }
+        .loader {
+            border: 5px solid #f3f3f3; border-radius: 50%; border-top: 5px solid #3498db;
+            width: 50px; height: 50px; animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        button:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body class="bg-slate-100 flex flex-col min-h-screen">
+    <!-- Loader -->
+    <div id="loader-overlay" class="modal-backdrop"><div class="loader"></div></div>
+
+    <!-- Modals -->
+    <div id="login-modal" class="modal-backdrop hidden">
+        <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-sm text-center">
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">تسجيل الدخول</h1>
+            <p class="text-gray-500 mb-6">الرجاء تسجيل الدخول بحساب Google للمتابعة.</p>
+            <button id="google-login-btn" class="w-full flex items-center justify-center gap-3 bg-white border border-gray-300 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-50 transition">
+                <svg class="w-6 h-6" viewBox="0 0 48 48"><defs><path id="a" d="M44.5 20H24v8.5h11.8C34.7 33.9 30.1 37 24 37c-7.2 0-13-5.8-13-13s5.8-13 13-13c3.1 0 5.9 1.1 8.1 2.9l6.4-6.4C34.6 4.1 29.6 2 24 2 11.8 2 2 11.8 2 24s9.8 22 22 22c11 0 21-8 21-22 0-1.3-.2-2.7-.5-4z"/></defs><clipPath id="b"><use xlink:href="#a" overflow="visible"/></clipPath><path clip-path="url(#b)" fill="#FBBC05" d="M0 37V11l17 13z"/><path clip-path="url(#b)" fill="#EA4335" d="M0 11l17 13 7-6.1L48 14V0H0z"/><path clip-path="url(#b)" fill="#34A853" d="M0 37l30-23.1 7.9 5.2L48 37H0z"/><path clip-path="url(#b)" fill="#4285F4" d="M48 48L17 24l-4-3 35-10z"/></svg>
+                <span>تسجيل الدخول باستخدام Google</span>
+            </button>
+            <button type="button" id="cancel-login-btn" class="w-full mt-4 bg-gray-200 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-300 transition">إلغاء</button>
+            <p id="login-error" class="text-red-500 mt-4 text-sm hidden">هذا الحساب غير مصرح له بالدخول كمسؤول.</p>
+        </div>
+    </div>
+        
+    <div id="app-screen" class="hidden flex-grow flex-col">
+        <header class="bg-white shadow-md sticky top-0 z-40">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center flex-wrap gap-4">
+                <div class="flex items-center gap-3">
+                    <img src="logo.png" alt="Logo" class="h-12 w-12 rounded-full">
+                    <h1 class="text-xl sm:text-2xl font-bold text-gray-800">دوري كرة القدم</h1>
+                </div>
+                <div id="header-buttons" class="flex items-center gap-2 sm:gap-3">
+                    <button id="query-reg-btn" class="bg-indigo-600 text-white px-4 sm:px-6 py-2 rounded-lg font-semibold hover:bg-indigo-700 transition text-sm sm:text-base">الاستعلام عن فريق</button>
+                    <button id="admin-login-btn" class="bg-gray-800 text-white px-4 sm:px-6 py-2 rounded-lg font-semibold hover:bg-gray-900 transition text-sm sm:text-base">تسجيل الدخول</button>
+                    <!-- Admin specific buttons -->
+                    <button id="view-teams-btn" class="bg-teal-600 text-white px-4 sm:px-6 py-2 rounded-lg font-semibold hover:bg-teal-700 transition hidden text-sm sm:text-base">عرض الفرق (الإدارة)</button>
+                    <button id="export-excel-btn" class="bg-green-600 text-white px-4 sm:px-6 py-2 rounded-lg font-semibold hover:bg-green-700 transition flex items-center gap-2 hidden text-sm sm:text-base">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                        <span>تصدير البيانات</span>
+                    </button>
+                    <button id="logout-btn" class="bg-red-600 text-white px-4 sm:px-6 py-2 rounded-lg font-semibold hover:bg-red-700 transition hidden text-sm sm:text-base">خروج</button>
+                </div>
+            </div>
+        </header>
+        <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow">
+            <div class="bg-indigo-600 text-white p-4 rounded-lg mb-8 text-center shadow-lg">
+                <h3 class="font-bold text-xl mb-2">📢 تنبيه هام الموقع غير قابل للتهكير</h3>
+                <p>آخر موعد للتسجيل هو الخميس القادم. سيتم الإعلان عن جدول المباريات قريباً.</p>
+            </div>
+            
+            <div id="main-actions" class="bg-white rounded-xl shadow-lg p-6 text-center mb-12">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">مرحباً بكم في دوري كرة القدم</h2>
+                <div class="flex justify-center items-center text-lg text-gray-600 py-4">
+                    <span>إجمالي الفرق المسجلة:</span><span id="team-count-display" class="font-bold text-indigo-600 mx-2 text-3xl">0</span>
+                </div>
+                <div class="mt-6">
+                    <button id="add-team-btn" class="text-white px-8 py-3 rounded-lg font-semibold transition bg-blue-600 hover:bg-blue-700 text-lg">
+                        <svg class="inline-block w-6 h-6 -mt-1 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+                        <span>سجل فريقك الآن</span>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="my-12">
+                <h3 class="text-2xl font-bold text-gray-800 mb-6 text-center border-b pb-4">لاعبون يبحثون عن فريق</h3>
+                <div class="text-center mb-6">
+                     <button id="add-free-player-btn" class="bg-green-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-green-700 transition">
+                         <svg class="inline-block w-5 h-5 ml-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" /></svg>
+                          أضف اسمك للقائمة
+                     </button>
+                     <button id="remove-free-player-btn" class="bg-gray-500 text-white px-6 py-2 rounded-lg font-semibold hover:bg-gray-600 transition mr-2">
+                         <svg class="inline-block w-5 h-5 ml-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                         احذف اسمك
+                     </button>
+                </div>
+                <div id="free-players-display-area" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                </div>
+            </div>
+
+            <h3 class="text-2xl font-bold text-gray-800 mt-12 mb-6 text-center border-b pb-4">الفرق المشاركة</h3>
+            
+            <div id="teams-display-area" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            </div>
+
+        </main>
+        <footer class="bg-gray-800 text-white text-center">
+            <div class="container mx-auto px-4 py-8">
+                <p class="font-bold text-xl mb-6">تحت إشراف رعاية الشباب واتحاد الطلاب</p>
+            </div>
+            <div class="bg-gray-900 py-4 mt-6">
+                <div class="container mx-auto px-4">
+                    <p class="text-gray-400 text-sm">الموقع من تصميم نديم بدر ليدر ذكاء اصطناعي الفرقة التالتة</p>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <div id="team-reg-modal" class="modal-backdrop hidden">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl m-4 flex flex-col" style="max-height: 90vh;">
+            <div class="p-6 border-b border-gray-200 flex-shrink-0"><h2 id="modal-title" class="text-2xl font-bold text-gray-800">تسجيل فريق جديد</h2></div>
+            
+            <div class="p-6 overflow-y-auto flex-grow">
+                <form id="team-reg-form" novalidate>
+                    <input type="hidden" id="team-doc-id">
+                    <h3 class="text-lg font-semibold text-gray-700 mb-4 border-b pb-2">بيانات الكابتن والفريق</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-6">
+                        <input required type="text" id="team-name" placeholder="اسم الفريق" class="rtl-input w-full p-3 border border-gray-300 rounded-lg">
+                        <input required type="text" id="captain-name" placeholder="اسم الكابتن" class="rtl-input w-full p-3 border border-gray-300 rounded-lg">
+                        <div class="relative">
+                           <input required type="tel" id="captain-mobile" placeholder="رقم موبايل الكابتن" class="rtl-input w-full p-3 border border-gray-300 rounded-lg">
+                           <p id="mobile-error" class="text-red-500 text-xs mt-1 hidden">رقم الموبايل غير صحيح (11 رقم يبدأ بـ 01).</p>
+                        </div>
+                        <div class="relative">
+                             <input required type="text" id="captain-national-id" placeholder="الرقم القومي للكابتن" maxlength="14" class="rtl-input w-full p-3 border border-gray-300 rounded-lg">
+                             <p id="national-id-error" class="text-red-500 text-xs mt-1 hidden">الرقم القومي يجب أن يتكون من 14 رقم.</p>
+                        </div>
+                        <div class="col-span-full mt-2">
+                            <label class="flex items-center space-x-2 rtl:space-x-reverse cursor-pointer">
+                                <input type="checkbox" id="looking-for-players" class="form-checkbox h-5 w-5 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500">
+                                <span class="text-gray-700">فريقنا غير مكتمل ونبحث عن لاعبين للانضمام.</span>
+                            </label>
+                        </div>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-700 mb-4 border-b pb-2">قائمة اللاعبين (8 أساسي + 2 اختياري)</h3>
+                    <div id="players-container" class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    </div>
+                </form>
+            </div>
+
+            <div class="p-6 bg-gray-50 border-t border-gray-200 flex justify-end gap-3 flex-shrink-0">
+                <button type="button" id="cancel-add-btn" class="bg-gray-200 text-gray-700 px-6 py-2 rounded-lg font-semibold hover:bg-gray-300 transition">إلغاء</button>
+                <button type="submit" form="team-reg-form" id="form-submit-btn" class="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition">حفظ التسجيل</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="free-player-modal" class="modal-backdrop hidden">
+        <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-sm">
+            <h2 id="free-player-modal-title" class="text-2xl font-bold text-gray-800 mb-6 text-center">تسجيل لاعب حر</h2>
+            <form id="free-player-form">
+                <div id="free-player-add-view">
+                    <input type="text" id="free-player-name" required placeholder="اسمك الثلاثي" class="w-full px-4 py-3 border border-gray-300 rounded-lg mb-4">
+                    <input type="tel" id="free-player-mobile" required placeholder="رقم موبايل للتواصل" class="w-full px-4 py-3 border border-gray-300 rounded-lg mb-4">
+                    <input type="text" id="free-player-national-id" required placeholder="رقمك القومي (14 رقم)" maxlength="14" class="w-full px-4 py-3 border border-gray-300 rounded-lg mb-4">
+                </div>
+                 <div id="free-player-remove-view" class="hidden">
+                    <p class="text-center mb-4">أدخل رقمك القومي المسجل لحذف اسمك من القائمة.</p>
+                    <input type="text" id="free-player-remove-national-id" placeholder="الرقم القومي المسجل" maxlength="14" class="w-full px-4 py-3 border border-gray-300 rounded-lg mb-4">
+                 </div>
+                <div class="flex gap-3 mt-6">
+                    <button type="button" id="cancel-free-player-btn" class="flex-1 bg-gray-200 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-300">إلغاء</button>
+                    <button type="submit" id="submit-free-player-btn" class="flex-1 bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700">تسجيل</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="view-teams-modal" class="modal-backdrop hidden">
+         <div class="bg-white rounded-2xl shadow-xl w-full max-w-5xl m-4 flex flex-col" style="max-height: 90vh;">
+            <div class="p-6 border-b border-gray-200"><h2 id="view-modal-title" class="text-2xl font-bold text-gray-800">الفرق المسجلة</h2></div>
+            <div class="p-6 overflow-y-auto"><div class="overflow-x-auto"><table class="min-w-full divide-y divide-gray-200"><thead class="bg-gray-50"><tr><th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">اسم الفريق</th><th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">اسم الكابتن</th><th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">الموبايل</th><th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">الرقم القومي</th><th class="px-6 py-3"></th></tr></thead><tbody id="teams-table-body" class="bg-white divide-y divide-gray-200"></tbody></table></div></div>
+            <div class="p-4 bg-gray-50 border-t border-gray-200 flex justify-end"><button type="button" id="close-view-btn" class="bg-gray-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-gray-700 transition">إغلاق</button></div>
+        </div>
+    </div>
+
+    <div id="team-query-modal" class="modal-backdrop hidden">
+        <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-lg">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">الاستعلام عن فريق</h2>
+            <div id="query-search-view">
+                <p class="text-gray-600 mb-4 text-center">أدخل الرقم القومي للكابتن لعرض أو تعديل تسجيل الفريق.</p>
+                <form id="team-query-form">
+                    <input type="text" id="query-national-id" placeholder="الرقم القومي للكابتن" maxlength="14" class="w-full px-4 py-3 border border-gray-300 rounded-lg mb-4 text-center">
+                    <p id="query-national-id-error" class="text-red-500 text-xs mb-4 text-center hidden">الرقم القومي المدخل غير صحيح (14 رقم).</p>
+                    <div class="flex gap-3">
+                         <button type="button" id="cancel-query-btn" class="flex-1 bg-gray-200 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-300">إلغاء</button>
+                        <button type="submit" class="flex-1 bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700">بحث</button>
+                    </div>
+                </form>
+            </div>
+            <div id="query-result-view" class="hidden">
+                 <h3 class="text-xl font-bold text-gray-800 mb-4 text-center">بيانات تسجيل فريقك</h3>
+                 <div id="query-result-details" class="space-y-3 mb-6 border-r-4 border-indigo-500 pr-4 text-right"></div>
+                 <div class="flex justify-center gap-4 flex-wrap">
+                    <button id="delete-reg-btn" class="bg-red-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-red-700">حذف التسجيل</button>
+                    <button id="edit-reg-btn" class="bg-yellow-500 text-white px-6 py-2 rounded-lg font-semibold hover:bg-yellow-600">تعديل التسجيل</button>
+                 </div>
+                 <button id="back-to-query-search" class="mt-4 text-sm text-indigo-600 hover:underline w-full text-center">بحث برقم آخر</button>
+            </div>
+             <p id="query-error" class="text-red-500 mt-4 text-sm hidden text-center">الرقم القومي غير مسجل لأي فريق.</p>
+        </div>
+    </div>
+
+    <div id="message-modal" class="modal-backdrop hidden">
+        <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-sm text-center">
+            <h2 id="message-modal-title" class="text-2xl font-bold text-gray-800 mb-4"></h2>
+            <p id="message-modal-body" class="text-gray-600 mb-6"></p>
+            <div id="message-modal-actions" class="flex justify-center gap-3"></div>
+        </div>
+    </div>
+    
+    <!-- Firebase SDKs -->
+    <script src="/__/firebase/8.10.1/firebase-app.js"></script>
+    <script src="/__/firebase/8.10.1/firebase-auth.js"></script>
+    <script src="/__/firebase/8.10.1/firebase-firestore.js"></script>
+    <script src="/__/firebase/init.js"></script>
+
+<script type="module" src="football.js"></script>
+
+</body>
+</html>
+

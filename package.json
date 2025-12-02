@@ -1,26 +1,12 @@
 {
-  "name": "hitu_ai",
+  "name": "firestore-migration",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "A script to migrate Firestore data to a new structure.",
+  "main": "migrate.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node migrate.js"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/NadeemBadr00/hitu-ai-assistant.git"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/NadeemBadr00/hitu-ai-assistant/issues"
-  },
-  "homepage": "https://github.com/NadeemBadr00/hitu-ai-assistant#readme",
   "dependencies": {
-    "axios": "^1.12.2",
-    "cors": "^2.8.5",
-    "firebase-admin": "^13.5.0",
-    "firebase-functions": "^6.5.0"
+    "firebase-admin": "^11.0.0"
   }
 }

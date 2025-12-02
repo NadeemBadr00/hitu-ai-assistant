@@ -3,19 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>الزيارات الطلابية</title>
+    <title>تسجيل زيارة المركز القومي للبحوث</title>
 
     <!-- Favicon and Social Media Meta Tags -->
     <link rel="icon" href="https://ai4roadmap.com/logo.png" type="image/png">
     
-    <meta name="description" content="نظام تسجيل وإدارة الزيارات الطلابية العلمية لجامعة حلوان التكنولوجية.">
-    <meta name="keywords" content="الزيارات الطلابية, جامعة حلوان التكنولوجية, نظام تسجيل, إدارة الزيارات">
+    <meta name="description" content="نظام تسجيل الطلاب لزيارة المركز القومي للبحوث - جامعة حلوان التكنولوجية.">
+    <meta name="keywords" content="تسجيل الطلاب, جامعة حلوان التكنولوجية, المركز القومي للبحوث, زيارة علمية">
     
     <!-- Open Graph / Facebook / WhatsApp -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://ai4roadmap.com/">
-    <meta property="og:title" content="الزيارات الطلابية | جامعة حلوان التكنولوجية">
-    <meta property="og:description" content="نظام تسجيل وإدارة الزيارات الطلابية العلمية.">
+    <meta property="og:title" content="تسجيل زيارة | المركز القومي للبحوث">
+    <meta property="og:description" content="نظام تسجيل الطلاب لزيارة المركز القومي للبحوث.">
     <meta property="og:image" content="https://ai4roadmap.com/logo.png">
     <meta property="og:image:width" content="512">
     <meta property="og:image:height" content="512">
@@ -23,8 +23,8 @@
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://ai4roadmap.com/">
-    <meta property="twitter:title" content="الزيارات الطلابية | جامعة حلوان التكنولوجية">
-    <meta property="twitter:description" content="نظام تسجيل وإدارة الزيارات الطلابية العلمية.">
+    <meta property="twitter:title" content="تسجيل زيارة | المركز القومي للبحوث">
+    <meta property="twitter:description" content="نظام تسجيل الطلاب لزيارة المركز القومي للبحوث.">
     <meta property="twitter:image" content="https://ai4roadmap.com/logo.png">
 
     <!-- Google Analytics -->
@@ -43,10 +43,7 @@
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
     <style>
         body { font-family: 'Cairo', sans-serif; background-color: #f1f5f9; }
         .modal-backdrop { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.3); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); display: flex; justify-content: center; align-items: center; z-index: 50; transition: opacity 0.3s ease-in-out; }
@@ -92,7 +89,7 @@
             <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center flex-wrap gap-4">
                 <div class="flex items-center gap-3">
                     <img src="logo1.png" alt="Logo" class="h-12">
-                    <h1 class="text-2xl font-bold text-gray-800">نظام تسجيل الزيارات العلمية</h1>
+                    <h1 class="text-2xl font-bold text-gray-800">تسجيل زيارة المركز القومي للبحوث</h1>
                 </div>
                 <div id="header-buttons" class="flex items-center gap-3">
                     <button id="query-reg-btn" class="bg-indigo-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-indigo-700 transition">الاستعلام عن التسجيل</button>
@@ -106,7 +103,16 @@
             </div>
         </header>
         <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow">
-            <div id="destinations-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+            <div class="bg-blue-100 border-t-4 border-blue-500 rounded-b text-blue-900 px-4 py-3 shadow-md mb-6" role="alert">
+                <div class="flex">
+                    <div class="py-1"><svg class="fill-current h-6 w-6 text-blue-500 mr-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M2.93 17.07A10 10 0 1 1 17.07 2.93 10 10 0 0 1 2.93 17.07zM9 11v4h2v-4H9zm0-4h2v2H9V7z"/></svg></div>
+                    <div>
+                        <p class="font-bold">زيارة المركز القومي للبحوث (الأربعاء)</p>
+                        <p class="text-sm">هذا التسجيل خاص بزيارة المركز القومي للبحوث يوم الأربعاء القادم. سيتم اختيار أول 15 طالبًا مسجلين من كل تخصص.</p>
+                    </div>
+                </div>
+            </div>
+            <div id="specializations-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
         </main>
         <footer class="bg-gray-800 text-white text-center py-4">
             <p>الموقع من تصميم نديم بدر ليدر ذكاء اصطناعي الفرقة التالتة</p>
@@ -117,10 +123,10 @@
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg m-4">
             <div class="p-6 border-b border-gray-200"><h2 id="modal-title" class="text-2xl font-bold text-gray-800">تسجيل طالب جديد</h2></div>
             <form id="add-student-form" class="p-6" novalidate>
-                <input type="hidden" id="destination-key">
-                <div id="destination-selector-wrapper" class="sm:col-span-2 hidden mb-5">
-                    <label for="destination-selector" class="block mb-2 text-sm font-medium text-gray-900">تغيير مكان الزيارة إلى:</label>
-                    <select id="destination-selector" class="rtl-input w-full p-3 border border-gray-300 rounded-lg bg-white"></select>
+                <input type="hidden" id="specialization-key">
+                <div id="specialization-selector-wrapper" class="sm:col-span-2 hidden mb-5">
+                    <label for="specialization-selector" class="block mb-2 text-sm font-medium text-gray-900">تغيير التخصص إلى:</label>
+                    <select id="specialization-selector" class="rtl-input w-full p-3 border border-gray-300 rounded-lg bg-white"></select>
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
                     <input required type="text" id="student-name" placeholder="اسم الطالب" class="rtl-input w-full p-3 border border-gray-300 rounded-lg">
@@ -131,9 +137,6 @@
                     </div>
                     <select required id="student-year" class="rtl-input w-full p-3 border border-gray-300 rounded-lg bg-white">
                         <option value="" disabled selected>اختر الفرقة الدراسية</option><option value="الأولى">الأولى</option><option value="الثانية">الثانية</option><option value="الثالثة">الثالثة</option><option value="الرابعة">الرابعة</option>
-                    </select>
-                    <select required id="student-specialization" class="rtl-input w-full p-3 border border-gray-300 rounded-lg bg-white">
-                        <option value="" disabled selected>اختر التخصص</option><option value="ذكاء اصطناعي">ذكاء اصطناعي</option><option value="امن سيبراني">امن سيبراني</option><option value="علوم بيانات">علوم بيانات</option><option value="ميكاترونكس">ميكاترونكس</option><option value="اوتوترونكس">اوتوترونكس</option><option value="ملابس جاهزة">ملابس جاهزة</option><option value="التحكم في الاليات الصناعية">التحكم في الاليات الصناعية</option>
                     </select>
                 </div>
                 <div class="mt-8 flex justify-end gap-3">
@@ -147,7 +150,7 @@
     <div id="view-students-modal" class="modal-backdrop hidden">
          <div class="bg-white rounded-2xl shadow-xl w-full max-w-4xl m-4 flex flex-col" style="max-height: 90vh;">
             <div class="p-6 border-b border-gray-200"><h2 id="view-modal-title" class="text-2xl font-bold text-gray-800">الطلاب المسجلون</h2></div>
-            <div class="p-6 overflow-y-auto"><div class="overflow-x-auto"><table class="min-w-full divide-y divide-gray-200"><thead class="bg-gray-50"><tr><th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">اسم الطالب</th><th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">الموبايل</th><th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">الرقم القومي</th><th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">الفرقة</th><th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">التخصص</th><th class="px-6 py-3"></th></tr></thead><tbody id="students-table-body" class="bg-white divide-y divide-gray-200"></tbody></table></div></div>
+            <div class="p-6 overflow-y-auto"><div class="overflow-x-auto"><table class="min-w-full divide-y divide-gray-200"><thead class="bg-gray-50"><tr><th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">اسم الطالب</th><th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">الموبايل</th><th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">الرقم القومي</th><th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">الفرقة</th><th class="px-6 py-3"></th></tr></thead><tbody id="students-table-body" class="bg-white divide-y divide-gray-200"></tbody></table></div></div>
             <div class="p-4 bg-gray-50 border-t border-gray-200 flex justify-end"><button type="button" id="close-view-btn" class="bg-gray-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-gray-700 transition">إغلاق</button></div>
         </div>
     </div>
@@ -182,7 +185,7 @@
     <div id="message-modal" class="modal-backdrop hidden">
         <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-sm text-center">
             <h2 id="message-modal-title" class="text-2xl font-bold text-gray-800 mb-4"></h2>
-            <p id="message-modal-body" class="text-gray-600 mb-6"></p>
+            <p id="message-modal-body" class="text-gray-600 mb-6 whitespace-pre-wrap"></p>
             <div id="message-modal-actions" class="flex justify-center gap-3"></div>
         </div>
     </div>
@@ -216,7 +219,7 @@
         const loaderOverlay = document.getElementById('loader-overlay');
         const appScreen = document.getElementById('app-screen');
         const loginModal = document.getElementById('login-modal');
-        const destinationsContainer = document.getElementById('destinations-container');
+        const specializationsContainer = document.getElementById('specializations-container');
         const addStudentModal = document.getElementById('add-student-modal');
         const viewStudentsModal = document.getElementById('view-students-modal');
         const messageModal = document.getElementById('message-modal');
@@ -235,12 +238,13 @@
         const queryNationalIdInput = document.getElementById('query-national-id');
 
         // --- System Settings ---
-        const MAX_STUDENTS_PER_DESTINATION = 30;
-        const DESTINATIONS = {
-            'petroleum_research': 'معهد بحوث البترول', 'remote_sensing': 'هيئة الاستشعار من البعد', 'electronics_research': 'معهد بحوث الالكترونيات',
-            'social_research': 'المركز القومى للبحوث الاجتماعية', 'laser_science': 'معهد علوم الليزر', 'aviation_academy': 'اكاديمية مصر للطيران',
-            'national_research': 'المركز القومى للبحوث', 'agri_research': 'مركز البحوث الزراعية', 'new_energy': 'هيئة الطاقة الجديدة والمتجددة',
-            'it_institute': 'معهد تكنولوجيا المعلومات بمدينة المعرفة', 'national_projects': 'المشروعات القومية بالعاصمة الادارية الجديدة'
+        const MAX_STUDENTS_PER_SPECIALIZATION = 15; // Limit set to 15 students
+        
+        const SPECIALIZATIONS = {
+            'mechatronics': 'ميكاترونكس',
+            'autotronics': 'اوتوترونكس',
+            'ready_garments': 'ملابس جاهزة',
+            'industrial_automation': 'التحكم في الاليات الصناعية'
         };
 
         // --- App State ---
@@ -273,17 +277,17 @@
             messageModal.classList.remove('hidden');
         }
 
-        function renderDestinations() {
-            destinationsContainer.innerHTML = '';
-            Object.entries(DESTINATIONS).forEach(([key, name]) => {
-                const destData = appData[key] || { students: [], waitingList: [] };
-                const studentCount = destData.students.length;
-                const waitingCount = destData.waitingList.length;
-                const isFull = studentCount >= MAX_STUDENTS_PER_DESTINATION;
-                const progressPercentage = (studentCount / MAX_STUDENTS_PER_DESTINATION) * 100;
+        function renderSpecializations() {
+            specializationsContainer.innerHTML = '';
+            Object.entries(SPECIALIZATIONS).forEach(([key, name]) => {
+                const specData = appData[key] || { students: [], waitingList: [] };
+                const studentCount = specData.students.length;
+                const waitingCount = specData.waitingList.length;
+                const isFull = studentCount >= MAX_STUDENTS_PER_SPECIALIZATION;
+                const progressPercentage = (studentCount / MAX_STUDENTS_PER_SPECIALIZATION) * 100;
 
                 const adminButtons = isAdminLoggedIn ? `<button data-key="${key}" class="view-students-btn flex-1 bg-gray-100 text-gray-700 px-4 py-2 rounded-lg font-semibold hover:bg-gray-200">عرض</button>` : '';
-                const registerButtonText = isFull ? 'انضم لقائمة الانتظار' : 'تسجيل طالب';
+                const registerButtonText = isFull ? 'انضم لقائمة الانتظار' : 'تسجيل للزيارة';
                 const registerButtonColor = isFull ? 'bg-yellow-500 hover:bg-yellow-600' : 'bg-blue-600 hover:bg-blue-700';
 
                 const card = `
@@ -291,7 +295,7 @@
                         <h2 class="text-xl font-bold text-gray-800 mb-3">${name}</h2>
                         <div class="flex-grow space-y-2">
                             <div class="flex justify-between items-center text-sm text-gray-600">
-                                <span>العدد المسجل</span><span class="font-semibold text-gray-800">${studentCount} / ${MAX_STUDENTS_PER_DESTINATION}</span>
+                                <span>العدد المسجل</span><span class="font-semibold text-gray-800">${studentCount} / ${MAX_STUDENTS_PER_SPECIALIZATION}</span>
                             </div>
                             <div class="w-full bg-gray-200 rounded-full h-2.5"><div class="bg-blue-600 h-2.5 rounded-full progress-bar-fill" style="width: ${progressPercentage}%"></div></div>
                              ${waitingCount > 0 ? `<div class="text-sm text-yellow-600 text-center pt-1">يوجد ${waitingCount} في قائمة الانتظار</div>` : ''}
@@ -301,7 +305,7 @@
                             <button data-key="${key}" class="add-student-btn flex-1 text-white px-4 py-2 rounded-lg font-semibold transition ${registerButtonColor}">${registerButtonText}</button>
                         </div>
                     </div>`;
-                destinationsContainer.innerHTML += card;
+                specializationsContainer.innerHTML += card;
             });
             addEventListenersToButtons();
         }
@@ -319,9 +323,9 @@
 
         // --- Firebase Functions ---
         async function findStudentByNationalId(nationalId) {
-            for (const key of Object.keys(DESTINATIONS)) {
+            for (const key of Object.keys(SPECIALIZATIONS)) {
                 for (const location of ['students', 'waitingList']) {
-                    const ref = collection(db, "destinations", key, location);
+                    const ref = collection(db, "specializations", key, location);
                     const q = query(ref, where("nationalId", "==", nationalId));
                     const snapshot = await getDocs(q);
                     if (!snapshot.empty) {
@@ -336,11 +340,11 @@
         async function performDelete(key, docId, location) {
             showLoader();
             try {
-                const studentDocRef = doc(db, "destinations", key, location, docId);
+                const studentDocRef = doc(db, "specializations", key, location, docId);
                 await deleteDoc(studentDocRef);
 
                 if (location === 'students' && (appData[key]?.waitingList.length || 0) > 0) {
-                    const waitingListRef = collection(db, "destinations", key, "waitingList");
+                    const waitingListRef = collection(db, "specializations", key, "waitingList");
                     const q = query(waitingListRef, orderBy("createdAt"), limit(1));
                     const snapshot = await getDocs(q);
                     if (!snapshot.empty) {
@@ -348,8 +352,8 @@
                         const studentData = firstWaitingStudentDoc.data();
                         
                         const batch = writeBatch(db);
-                        const newStudentRef = doc(collection(db, "destinations", key, "students"));
-                        batch.set(newStudentRef, { name: studentData.name, mobile: studentData.mobile, nationalId: studentData.nationalId, year: studentData.year, specialization: studentData.specialization });
+                        const newStudentRef = doc(collection(db, "specializations", key, "students"));
+                        batch.set(newStudentRef, { name: studentData.name, mobile: studentData.mobile, nationalId: studentData.nationalId, year: studentData.year });
                         batch.delete(firstWaitingStudentDoc.ref);
                         await batch.commit();
                         showMessageModal('تمت الترقية', `تم حذف الطالب وترقية طالب من قائمة الانتظار بنجاح.`);
@@ -374,18 +378,18 @@
             adminLoginBtn.classList.toggle('hidden', isAdminLoggedIn);
             exportExcelBtn.classList.toggle('hidden', !isAdminLoggedIn);
             logoutBtn.classList.toggle('hidden', !isAdminLoggedIn);
-            renderDestinations();
+            renderSpecializations();
         }
 
         function populateAndOpenRegistrationForm(key, studentInfo = null) {
             addStudentForm.reset();
             const modalTitle = document.getElementById('modal-title');
             const submitBtn = document.getElementById('form-submit-btn');
-            const destinationSelectorWrapper = document.getElementById('destination-selector-wrapper');
-            const destinationSelector = document.getElementById('destination-selector');
+            const specializationSelectorWrapper = document.getElementById('specialization-selector-wrapper');
+            const specializationSelector = document.getElementById('specialization-selector');
             const nationalIdInput = document.getElementById('student-national-id');
             
-            document.getElementById('destination-key').value = key;
+            document.getElementById('specialization-key').value = key;
             nationalIdInput.onblur = null;
 
             if (studentInfo && studentInfo.found) {
@@ -397,21 +401,20 @@
                 nationalIdInput.readOnly = true;
                 nationalIdInput.classList.add('bg-gray-100', 'cursor-not-allowed');
                 document.getElementById('student-year').value = studentInfo.data.year;
-                document.getElementById('student-specialization').value = studentInfo.data.specialization;
                 
-                destinationSelectorWrapper.classList.remove('hidden');
-                destinationSelector.innerHTML = '';
-                Object.entries(DESTINATIONS).forEach(([destKey, destName]) => {
+                specializationSelectorWrapper.classList.remove('hidden');
+                specializationSelector.innerHTML = '';
+                Object.entries(SPECIALIZATIONS).forEach(([specKey, specName]) => {
                     const option = document.createElement('option');
-                    option.value = destKey;
-                    option.textContent = destName;
-                    if (destKey === studentInfo.key) {
+                    option.value = specKey;
+                    option.textContent = specName;
+                    if (specKey === studentInfo.key) {
                         option.selected = true;
                     }
-                    destinationSelector.appendChild(option);
+                    specializationSelector.appendChild(option);
                 });
 
-                showMessageModal('مرحباً بعودتك!', `لقد وجدنا تسجيلاً سابقاً لك. يمكنك تحديث بياناتك أو تغيير مكان الزيارة الآن.`, [{
+                showMessageModal('مرحباً بعودتك!', `لقد وجدنا تسجيلاً سابقاً لك. يمكنك تحديث بياناتك أو تغيير تخصصك الآن.`, [{
                     text: 'حسنًا',
                     class: 'bg-blue-600 text-white px-8 py-2 rounded-lg font-semibold hover:bg-blue-700 transition',
                     callback: () => {
@@ -420,9 +423,9 @@
                 }]);
 
             } else {
-                modalTitle.textContent = `تسجيل في: ${DESTINATIONS[key]}`;
+                modalTitle.textContent = `تسجيل في تخصص: ${SPECIALIZATIONS[key]}`;
                 submitBtn.textContent = 'تسجيل';
-                destinationSelectorWrapper.classList.add('hidden');
+                specializationSelectorWrapper.classList.add('hidden');
                 nationalIdInput.readOnly = false;
                 nationalIdInput.classList.remove('bg-gray-100', 'cursor-not-allowed');
             }
@@ -463,39 +466,70 @@
             document.getElementById('national-id-error').classList.add('hidden');
             showLoader();
 
-            const studentData = {
-                name: document.getElementById('student-name').value, mobile: document.getElementById('student-mobile').value,
-                nationalId: nationalIdInput.value, year: document.getElementById('student-year').value,
-                specialization: document.getElementById('student-specialization').value,
-            };
-
-            const destinationSelectorWrapper = document.getElementById('destination-selector-wrapper');
-            let newDestinationKey;
-            if (!destinationSelectorWrapper.classList.contains('hidden')) {
-                newDestinationKey = document.getElementById('destination-selector').value;
+            const specializationSelectorWrapper = document.getElementById('specialization-selector-wrapper');
+            let newSpecializationKey;
+            if (!specializationSelectorWrapper.classList.contains('hidden')) {
+                newSpecializationKey = document.getElementById('specialization-selector').value;
             } else {
-                newDestinationKey = document.getElementById('destination-key').value;
+                newSpecializationKey = document.getElementById('specialization-key').value;
             }
+
+            const studentData = {
+                name: document.getElementById('student-name').value, 
+                mobile: document.getElementById('student-mobile').value,
+                nationalId: nationalIdInput.value, 
+                year: document.getElementById('student-year').value,
+                specialization: SPECIALIZATIONS[newSpecializationKey] // Store the full name of the specialization
+            };
             
             const existingStudent = await findStudentByNationalId(studentData.nationalId);
             const batch = writeBatch(db);
 
             try {
                 if (existingStudent.found) {
-                    const oldDocRef = doc(db, "destinations", existingStudent.key, existingStudent.location, existingStudent.docId);
+                    const oldDocRef = doc(db, "specializations", existingStudent.key, existingStudent.location, existingStudent.docId);
                     batch.delete(oldDocRef);
                 }
 
-                const isNewDestinationFull = (appData[newDestinationKey]?.students.length || 0) >= MAX_STUDENTS_PER_DESTINATION;
-                const destinationRef = isNewDestinationFull ? collection(db, "destinations", newDestinationKey, "waitingList") : collection(db, "destinations", newDestinationKey, "students");
+                const isNewSpecializationFull = (appData[newSpecializationKey]?.students.length || 0) >= MAX_STUDENTS_PER_SPECIALIZATION;
+                const specializationRef = isNewSpecializationFull 
+                    ? collection(db, "specializations", newSpecializationKey, "waitingList") 
+                    : collection(db, "specializations", newSpecializationKey, "students");
                 
-                const newDocData = isNewDestinationFull ? { ...studentData, createdAt: serverTimestamp() } : studentData;
-                batch.set(doc(destinationRef), newDocData);
+                const newDocData = isNewSpecializationFull ? { ...studentData, createdAt: serverTimestamp() } : studentData;
+                batch.set(doc(specializationRef), newDocData);
                 
                 await batch.commit();
                 closeAllModals();
-                const message = isNewDestinationFull ? `اكتمل العدد. تم وضعك في قائمة الانتظار.` : `تم تسجيلك بنجاح في زيارة "${DESTINATIONS[newDestinationKey]}".`;
-                showMessageModal(existingStudent.found ? 'تم تحديث التسجيل!' : 'تسجيل ناجح!', message);
+
+                // --- [تعديل] رسالة النجاح المخصصة ---
+                const whatsappLink = 'https://chat.whatsapp.com/JkIz1FMyBTmJ5tPuoU60Pr?mode=wwt';
+                let title, body, actions;
+
+                if (isNewSpecializationFull) {
+                    title = existingStudent.found ? 'تم تحديث التسجيل!' : 'اكتمل العدد!';
+                    body = `اكتمل العدد للتخصص "${SPECIALIZATIONS[newSpecializationKey]}". تم وضعك في قائمة الانتظار.`;
+                    actions = [{
+                        text: 'حسنًا',
+                        class: 'bg-blue-600 text-white px-8 py-2 rounded-lg font-semibold hover:bg-blue-700 transition',
+                        callback: () => messageModal.classList.add('hidden')
+                    }];
+                } else {
+                    title = existingStudent.found ? 'تم تحديث التسجيل!' : 'تسجيل ناجح!';
+                    body = `تم تسجيلك بنجاح لزيارة المركز القومي للبحوث. الخطوة التالية هامة جدًا: \n\n **يجب عليك الانضمام لجروب WhatsApp الخاص بالزيارة لتأكيد حضورك.**`;
+                    actions = [{
+                        text: 'الانضمام للجروب الآن',
+                        class: 'bg-green-500 text-white px-8 py-2 rounded-lg font-semibold hover:bg-green-600 transition',
+                        callback: () => {
+                            window.open(whatsappLink, '_blank');
+                            messageModal.classList.add('hidden');
+                        }
+                    }];
+                }
+                
+                showMessageModal(title, body, actions);
+                // --- نهاية التعديل ---
+
             } catch (error) {
                 console.error("Error during registration:", error);
                 showMessageModal('خطأ', 'حدث خطأ أثناء حفظ البيانات. الرجاء المحاولة مرة أخرى.');
@@ -508,29 +542,27 @@
         }
 
         function handleViewStudentsClick(key) {
-            const destData = appData[key] || { students: [], waitingList: [] };
+            const specData = appData[key] || { students: [], waitingList: [] };
             const tableBody = document.getElementById('students-table-body');
-            document.getElementById('view-modal-title').textContent = `الطلاب المسجلون في: ${DESTINATIONS[key]}`;
+            document.getElementById('view-modal-title').textContent = `الطلاب المسجلون في: ${SPECIALIZATIONS[key]}`;
             
-            let html = destData.students.map(student => `<tr>
-                                <td class="px-6 py-4">${student.name}</td><td class="px-6 py-4">${student.mobile}</td>
-                                <td class="px-6 py-4">${student.nationalId}</td><td class="px-6 py-4">${student.year}</td>
-                                <td class="px-6 py-4">${student.specialization}</td>
-                                <td class="px-6 py-4 text-left">
-                                    <button data-key="${key}" data-doc-id="${student.docId}" data-location="students" class="delete-student-btn text-red-500 hover:text-red-700">حذف</button>
-                                </td></tr>`).join('');
+            let html = specData.students.map(student => `<tr>
+                            <td class="px-6 py-4">${student.name}</td><td class="px-6 py-4">${student.mobile}</td>
+                            <td class="px-6 py-4">${student.nationalId}</td><td class="px-6 py-4">${student.year}</td>
+                            <td class="px-6 py-4 text-left">
+                                <button data-key="${key}" data-doc-id="${student.docId}" data-location="students" class="delete-student-btn text-red-500 hover:text-red-700">حذف</button>
+                            </td></tr>`).join('');
 
-             if (destData.waitingList.length > 0) {
-                   html += '<tr><td colspan="6" class="text-center py-4 bg-yellow-50 font-bold text-yellow-700">قائمة الانتظار</td></tr>';
-                   html += destData.waitingList.map(student => `<tr class="bg-yellow-50">
-                                <td class="px-6 py-4">${student.name}</td><td class="px-6 py-4">${student.mobile}</td>
-                                <td class="px-6 py-4">${student.nationalId}</td><td class="px-6 py-4">${student.year}</td>
-                                <td class="px-6 py-4">${student.specialization}</td>
-                                <td class="px-6 py-4 text-left">
-                                     <button data-key="${key}" data-doc-id="${student.docId}" data-location="waitingList" class="delete-student-btn text-red-500 hover:text-red-700">حذف</button>
-                                </td></tr>`).join('');
-            }
-            if (!html) html = '<tr><td colspan="6" class="text-center py-10 text-gray-500">لا يوجد طلاب مسجلون حالياً.</td></tr>';
+             if (specData.waitingList.length > 0) {
+                 html += '<tr><td colspan="5" class="text-center py-4 bg-yellow-50 font-bold text-yellow-700">قائمة الانتظار</td></tr>';
+                 html += specData.waitingList.map(student => `<tr class="bg-yellow-50">
+                            <td class="px-6 py-4">${student.name}</td><td class="px-6 py-4">${student.mobile}</td>
+                            <td class="px-6 py-4">${student.nationalId}</td><td class="px-6 py-4">${student.year}</td>
+                            <td class="px-6 py-4 text-left">
+                                 <button data-key="${key}" data-doc-id="${student.docId}" data-location="waitingList" class="delete-student-btn text-red-500 hover:text-red-700">حذف</button>
+                            </td></tr>`).join('');
+             }
+            if (!html) html = '<tr><td colspan="5" class="text-center py-10 text-gray-500">لا يوجد طلاب مسجلون حالياً.</td></tr>';
 
             tableBody.innerHTML = html;
             viewStudentsModal.classList.remove('hidden');
@@ -545,16 +577,16 @@
 
         // --- Init & Data Listeners ---
         function initializeDataListeners() {
-            Object.keys(DESTINATIONS).forEach(key => {
-                onSnapshot(collection(db, "destinations", key, "students"), (snapshot) => {
+            Object.keys(SPECIALIZATIONS).forEach(key => {
+                onSnapshot(collection(db, "specializations", key, "students"), (snapshot) => {
                     if (!appData[key]) appData[key] = { students: [], waitingList: [] };
                     appData[key].students = snapshot.docs.map(doc => ({ ...doc.data(), docId: doc.id }));
-                    renderDestinations();
+                    renderSpecializations();
                 });
-                onSnapshot(query(collection(db, "destinations", key, "waitingList"), orderBy("createdAt")), (snapshot) => {
+                onSnapshot(query(collection(db, "specializations", key, "waitingList"), orderBy("createdAt")), (snapshot) => {
                      if (!appData[key]) appData[key] = { students: [], waitingList: [] };
                     appData[key].waitingList = snapshot.docs.map(doc => ({ ...doc.data(), docId: doc.id }));
-                    renderDestinations();
+                    renderSpecializations();
                 });
             });
         }
@@ -625,7 +657,7 @@
                     const status = studentInfo.location === 'students' ? 'مسجل' : 'قائمة الانتظار';
                     detailsContainer.innerHTML = `
                         <p><strong>الاسم:</strong> ${studentInfo.data.name}</p>
-                        <p><strong>جهة الزيارة:</strong> ${DESTINATIONS[studentInfo.key]}</p>
+                        <p><strong>التخصص:</strong> ${SPECIALIZATIONS[studentInfo.key]}</p>
                         <p><strong>الحالة:</strong> <span class="${status === 'مسجل' ? 'text-green-600' : 'text-yellow-600'} font-semibold">${status}</span></p>
                     `;
                     const editBtn = document.getElementById('edit-reg-btn');
@@ -656,16 +688,16 @@
 
         exportExcelBtn.addEventListener('click', () => {
              let allStudentsData = [];
-             Object.entries(DESTINATIONS).forEach(([key, name]) => {
-                  appData[key]?.students.forEach(s => allStudentsData.push({ 'الحالة': 'مسجل', 'جهة الزيارة': name, 'اسم الطالب': s.name, 'الموبايل': s.mobile, 'الرقم القومي': s.nationalId, 'الفرقة': s.year, 'التخصص': s.specialization }));
-                  appData[key]?.waitingList.forEach(s => allStudentsData.push({ 'الحالة': 'قائمة الانتظار', 'جهة الزيارة': name, 'اسم الطالب': s.name, 'الموبايل': s.mobile, 'الرقم القومي': s.nationalId, 'الفرقة': s.year, 'التخصص': s.specialization }));
+             Object.entries(SPECIALIZATIONS).forEach(([key, name]) => {
+                 appData[key]?.students.forEach(s => allStudentsData.push({ 'الحالة': 'مسجل', 'التخصص': name, 'اسم الطالب': s.name, 'الموبايل': s.mobile, 'الرقم القومي': s.nationalId, 'الفرقة': s.year }));
+                 appData[key]?.waitingList.forEach(s => allStudentsData.push({ 'الحالة': 'قائمة الانتظار', 'التخصص': name, 'اسم الطالب': s.name, 'الموبايل': s.mobile, 'الرقم القومي': s.nationalId, 'الفرقة': s.year }));
              });
              if (allStudentsData.length === 0) { showMessageModal('تنبيه', 'لا يوجد بيانات لتصديرها.'); return; }
              const worksheet = XLSX.utils.json_to_sheet(allStudentsData);
              const workbook = XLSX.utils.book_new();
              XLSX.utils.book_append_sheet(workbook, worksheet, 'بيانات الطلاب');
-             worksheet['!cols'] = [ { wch: 15 }, { wch: 35 }, { wch: 25 }, { wch: 15 }, { wch: 20 }, { wch: 15 }, { wch: 20 }];
-             XLSX.writeFile(workbook, 'كشف_الزيارات_العلمية.xlsx');
+             worksheet['!cols'] = [ { wch: 15 }, { wch: 30 }, { wch: 25 }, { wch: 15 }, { wch: 20 }, { wch: 15 }];
+             XLSX.writeFile(workbook, 'كشف_تسجيل_الزيارة.xlsx');
         });
 
         // --- App Start Logic ---

@@ -54,12 +54,9 @@
             align-items: center;
             gap: 8px;
             margin-top: 8px;
-            /* --- [تعديل] إظهار الأزرار بشكل دائم --- */
             opacity: 1;
             visibility: visible;
         }
-
-        /* --- [تم الحذف] لم نعد بحاجة لإظهار الأزرار عند المرور فقط --- */
         
         .icon-action-btn {
             background-color: #f0f4f9;
@@ -158,72 +155,8 @@
             line-height: 1;
         }
         
-        /* --- [ تصميم جديد للإحصائيات ] --- */
-        .stats-container {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
-
-        .stat-item {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            padding: 6px 12px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: #e2e8f0;
-            transition: background-color 0.2s ease;
-            cursor: default;
-        }
-
-        .stat-item:hover {
-            background: rgba(255, 255, 255, 0.15);
-        }
-
-        .stat-item svg {
-            color: #94a3b8; /* A slightly dimmer color for the icon */
-        }
-
-        .stat-info {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            line-height: 1.2;
-        }
-
-        .stat-number {
-            font-weight: 700;
-            font-size: 1rem;
-            color: #ffffff;
-        }
-
-        .stat-label {
-            font-size: 0.7rem;
-            font-weight: 500;
-            color: #cbd5e1; /* Lighter text for the label */
-        }
-
         /* --- [ تعديلات الهاتف ] --- */
         @media (max-width: 768px) {
-            .header-content {
-                flex-wrap: wrap;
-                justify-content: space-between;
-                align-items: center;
-                row-gap: 12px;
-            }
-
-            .stats-container {
-                /* Rules removed from here to allow flexible positioning */
-            }
-            
-            .header-right-controls {
-                display: flex;
-                align-items: center;
-                gap: 12px;
-            }
-
             .title h1 {
                 font-size: 1.05rem;
             }
@@ -287,6 +220,51 @@
             }
         }
     </style>
+    <style>
+        /* --- [ كود زر إيقاف الصوت ] --- */
+        .stop-audio-button {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            z-index: 1000;
+            background-color: #1a202c;
+            color: white;
+            border: 1px solid #4a5568;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        .stop-audio-button:hover {
+            background-color: #2d3748;
+            transform: scale(1.1);
+        }
+
+        .dark .stop-audio-button {
+            background-color: #f0f4f9;
+            color: #1a202c;
+            border: 1px solid #e2e8f0;
+        }
+        .dark .stop-audio-button:hover {
+            background-color: #e2e8f0;
+        }
+
+        /* --- [ تعديلات الهاتف ] --- */
+        @media (max-width: 768px) {
+            .stop-audio-button {
+                width: 45px;
+                height: 45px;
+                bottom: 15px;
+                left: 15px;
+            }
+        }
+    </style>
 </head>
 
 <body>
@@ -296,56 +274,60 @@
                 <div class="header-left">
                     <img src="logo.png" alt="logo" class="logo" id="logo-img">
                     <div class="title">
-                        <h1>المساعد الذكي لجامعة حلوان التكنولوجية</h1>
-                        <p>دليلك لكل ما يخص الجامعة والكلية</p>
+                        <h1>المساعد الذكي</h1>
+                        <p>لجامعة حلوان التكنولوجية</p>
                     </div>
                 </div>
 
                 <div class="header-right-controls">
-                    <!-- حاوية عرض الإحصائيات بالتصميم الجديد -->
-                    <div class="stats-container">
-                        <div class="stat-item" title="إجمالي الرسائل المرسلة إلى المساعد الذكي">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-                            <div class="stat-info">
-                                <span class="stat-number" id="message-counter-number">0</span>
-                                <span class="stat-label">رسالة</span>
-                            </div>
-                        </div>
-                        <div class="stat-item" title="إجمالي عدد مرات تشغيل الصوت">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon></svg>
-                            <div class="stat-info">
-                                <span class="stat-number" id="audio-counter-number">0</span>
-                                <span class="stat-label">استماع</span>
-                            </div>
-                        </div>
+                    <!-- Stats -->
+                    <div class="stat-item" id="message-counter-wrapper" title="إجمالي الرسائل المرسلة إلى المساعد الذكي منذ البداية">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                        <span id="message-counter-number">0</span>
                     </div>
-    
-    
-                <div class="controls">
-                    <button id="admin-panel-btn" class="icon-btn" title="لوحة التحكم للمشرف" aria-label="Admin Panel">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color:white">
-                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-                            <path d="m9 12 2 2 4-4"></path>
+                    <div class="stat-item" id="audio-counter-wrapper" title="إجمالي عدد مرات الاستماع للردود الصوتية">
+                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon></svg>
+                        <span id="audio-counter-number">0</span>
+                    </div>
+        
+                    <!-- Mobile Menu Trigger Button -->
+                    <button id="mobile-menu-trigger" class="icon-btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                           <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 0 2l-.15.08a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1 0-2l.15-.08a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle>
                         </svg>
                     </button>
-                    <button id="save-chat-pdf-btn" class="icon-btn" title="حفظ المحادثة كـ PDF" aria-label="Save chat as PDF">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color:white">
-                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                            <polyline points="7 10 12 15 17 10"></polyline>
-                            <line x1="12" y1="15" x2="12" y2="3"></line>
-                        </svg>
-                    </button>
-                    <button id="dark-mode-toggle" class="icon-btn" title="تبديل الوضع الليلي / النهاري"
-                        aria-label="Toggle dark mode">
-                        <svg id="dark-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
-                            fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
-                            stroke-linejoin="round" style="color:white">
-                            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-                        </svg>
-                    </button>
+                    
+                    <!-- Container for the controls which will act as the menu -->
+                    <div class="controls-menu" id="controls-menu">
+                        <div class="divider"></div>
+                        <button id="reset-chat-btn" class="icon-btn" title="بدء محادثة جديدة" aria-label="Reset Chat">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="23 4 23 10 17 10"></polyline>
+                                <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                            </svg>
+                        </button>
+                        <button id="save-chat-pdf-btn" class="icon-btn" title="حفظ المحادثة كـ PDF" aria-label="Save chat as PDF">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="7 10 12 15 17 10"></polyline>
+                                <line x1="12" y1="15" x2="12" y2="3"></line>
+                            </svg>
+                        </button>
+                        <button id="dark-mode-toggle" class="icon-btn" title="تبديل الوضع الليلي" aria-label="Toggle dark mode">
+                            <svg id="dark-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                            </svg>
+                        </button>
+                         <button id="admin-panel-btn" class="icon-btn" title="لوحة التحكم للمشرف" aria-label="Admin Panel">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                                <path d="m9 12 2 2 4-4"></path>
+                            </svg>
+                        </button>
+                    </div>
                 </div>
-            </div>
-
             </div>
         </div>
 
@@ -436,10 +418,70 @@
         </div>
     </div>
 
+    <!-- عنصر الصوت الذي يحتوي على ملف PLAY.wav -->
+    <audio id="background-audio" src="PLAY.wav"></audio>
+    <!-- زر إيقاف الصوت الذي يظهر عند تشغيل الصوت -->
+    <button id="stop-audio-btn" class="stop-audio-button" title="إيقاف الصوت" aria-label="Stop background audio">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+            <line x1="23" y1="9" x2="17" y2="15"></line>
+            <line x1="17" y1="9" x2="23" y2="15"></line>
+        </svg>
+    </button>
+
 
    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
    <script type="module" src="main.js"></script>
+   <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const audio = document.getElementById('background-audio');
+            const stopBtn = document.getElementById('stop-audio-btn');
+            if (!audio || !stopBtn) return;
+
+            let isAudioSupposedToPlay = false;
+            stopBtn.style.display = 'none';
+
+            const attemptToPlay = () => {
+                if (isAudioSupposedToPlay && audio.paused) {
+                    audio.play().then(() => {
+                        stopBtn.style.display = 'flex';
+                    }).catch(e => {
+                        console.log("Could not play audio on this interaction, will try on next.");
+                    });
+                }
+            };
+
+            document.addEventListener('click', attemptToPlay, { once: false });
+            document.addEventListener('touchstart', attemptToPlay, { once: false });
+
+            audio.play().then(() => {
+                isAudioSupposedToPlay = true;
+                stopBtn.style.display = 'flex';
+            }).catch(error => {
+                console.warn("Autoplay was prevented. Waiting for user interaction.");
+                isAudioSupposedToPlay = true;
+            });
+
+            stopBtn.addEventListener('click', (e) => {
+                e.stopPropagation(); 
+                isAudioSupposedToPlay = false;
+                audio.pause();
+                audio.currentTime = 0;
+                stopBtn.style.display = 'none';
+            });
+
+            audio.addEventListener('ended', () => {
+                isAudioSupposedToPlay = false;
+                stopBtn.style.display = 'none';
+            });
+
+            audio.addEventListener('play', () => {
+                if (isAudioSupposedToPlay) {
+                    stopBtn.style.display = 'flex';
+                }
+            });
+        });
+   </script>
 </body>
 </html>
-
 

@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>استبيان وتقييم هيئة التدريس</title>
+    
+    <!-- 
+    ******************************************************************
+    * الأكواد المضافة (Analytics, AdSense, Social Share)
+    ******************************************************************
+    -->
+
+    <!-- Favicon -->
+    <link rel="icon" href="logo.png" type="image/png">
+
+    <!-- Social Media Share (Open Graph / Facebook / WhatsApp) -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://ai4roadmap.com/">
+    <meta property="og:title" content="استبيان وتقييم هيئة التدريس">
+    <meta property="og:description" content="نظام لتقييم أعضاء هيئة التدريس (دكاترة ومعيدين) وتسجيل الملاحظات.">
+    <meta property="og:image" content="https://ai4roadmap.com/logo.png">
+    <meta property="og:image:width" content="512">
+    <meta property="og:image:height" content="512">
+
+    <!-- Social Media Share (Twitter) -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://ai4roadmap.com/">
+    <meta property="twitter:title" content="استبيان وتقييم هيئة التدريس">
+    <meta property="twitter:description" content="نظام لتقييم أعضاء هيئة التدريس (دكاترة ومعيدين) وتسجيل الملاحظات.">
+    <meta property="twitter:image" content="https://ai4roadmap.com/logo.png">
+
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-4TENK8FGB1"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-4TENK8FGB1');
+    </script>
+
+    <!-- Google AdSense -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4896673999031703"
+         crossorigin="anonymous"></script>
+
+    <!-- 
+    ******************************************************************
+    * نهاية الأكواد المضافة
+    ******************************************************************
+    -->
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- XLSX Library for Excel Export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
+    <!-- Google Font (Cairo) -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body { font-family: 'Cairo', sans-serif; background-color: #f1f5f9; }
+        .modal-backdrop { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.3); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); display: flex; justify-content: center; align-items: center; z-index: 50; transition: opacity 0.3s ease-in-out; }
+        .modal-backdrop.hidden { opacity: 0; pointer-events: none; }
+        .rtl-input::placeholder { text-align: right; }
+        .loader {
+            border: 5px solid #f3f3f3; border-radius: 50%; border-top: 5px solid #3498db;
+            width: 50px; height: 50px; animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        button:disabled { opacity: 0.7; cursor: not-allowed; }
+        
+        /* Custom styles for select */
+        select:required:invalid { color: #9ca3af; } /* text-gray-400 */
+        option { color: #1f2937; } /* text-gray-800 */
+
+        /* [!!] كود النجوم [!!] */
+        .star-rating { display: flex; flex-direction: row-reverse; justify-content: center; }
+        .star-rating input[type="radio"] { display: none; }
+        .star-rating label {
+            font-size: 2.5rem; /* 40px */
+            color: #cbd5e1; /* gray-300 */
+            cursor: pointer;
+            transition: color 0.2s ease-in-out;
+            padding: 0 0.25rem; /* 4px */
+        }
+        .star-rating input[type="radio"]:checked ~ label,
+        .star-rating label:hover,
+        .star-rating label:hover ~ label {
+            color: #f59e0b; /* amber-500 */
+        }
+
+        /* [!!] تنسيق جديد لجداول التقييم [!!] */
+        .rating-card {
+            background-color: #f8fafc; /* gray-50 */
+            border: 1px solid #e2e8f0; /* gray-200 */
+            border-radius: 0.75rem; /* 12px */
+            padding: 1rem; /* 16px */
+            transition: all 0.2s ease-in-out;
+        }
+        .rating-card:hover {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+    </style>
+</head>
+<body class="bg-slate-100 flex flex-col min-h-screen">
+    <!-- Loader -->
+    <div id="loader-overlay" class="modal-backdrop"><div class="loader"></div></div>
+
+    <!-- Modals -->
+    <div id="login-modal" class="modal-backdrop hidden">
+        <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-sm text-center">
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">تسجيل الدخول (للإدارة)</h1>
+            <p class="text-gray-500 mb-6">الرجاء تسجيل الدخول بحساب Google للمتابعة.</p>
+            <button id="google-login-btn" class="w-full flex items-center justify-center gap-3 bg-white border border-gray-300 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-50 transition">
+                <svg class="w-6 h-6" viewBox="0 0 48 48"><defs><path id="a" d="M44.5 20H24v8.5h11.8C34.7 33.9 30.1 37 24 37c-7.2 0-13-5.8-13-13s5.8-13 13-13c3.1 0 5.9 1.1 8.1 2.9l6.4-6.4C34.6 4.1 29.6 2 24 2 11.8 2 2 11.8 2 24s9.8 22 22 22c11 0 21-8 21-22 0-1.3-.2-2.7-.5-4z"/></defs><clipPath id="b"><use xlink:href="#a" overflow="visible"/></clipPath><path clip-path="url(#b)" fill="#FBBC05" d="M0 37V11l17 13z"/><path clip-path="url(#b)" fill="#EA4335" d="M0 11l17 13 7-6.1L48 14V0H0z"/><path clip-path="url(#b)" fill="#34A853" d="M0 37l30-23.1 7.9 5.2L48 37H0z"/><path clip-path="url(#b)" fill="#4285F4" d="M48 48L17 24l-4-3 35-10z"/></svg>
+                <span>تسجيل الدخول باستخدام Google</span>
+            </button>
+            <button type="button" id="cancel-login-btn" class="w-full mt-4 bg-gray-200 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-300 transition">إلغاء</button>
+            <p id="login-error" class="text-red-500 mt-4 text-sm hidden">هذا الحساب غير مصرح له بالدخول كمسؤول.</p>
+        </div>
+    </div>
+        
+    <!-- [!!] تم حذف نافذة الإدخال المنبثقة [!!] -->
+
+    <div id="view-ratings-modal" class="modal-backdrop hidden">
+         <div class="bg-white rounded-2xl shadow-xl w-full max-w-6xl m-4 flex flex-col" style="max-height: 90vh;">
+            <div class="p-6 border-b border-gray-200"><h2 id="view-modal-title" class="text-2xl font-bold text-gray-800">التقييمات المسجلة</h2></div>
+            <div class="p-6 overflow-y-auto">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <!-- [!!] تعديل العناوين [!!] -->
+                            <tr>
+                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">اسم الطالب</th>
+                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">الدكتور/المعيد</th>
+                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">التقييم</th>
+                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">ملاحظة خاصة</th>
+                                <th class="px-6 py-3"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="ratings-table-body" class="bg-white divide-y divide-gray-200"></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="p-4 bg-gray-50 border-t border-gray-200 flex justify-end"><button type="button" id="close-view-btn" class="bg-gray-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-gray-700 transition">إغلاق</button></div>
+        </div>
+    </div>
+
+    <div id="message-modal" class="modal-backdrop hidden">
+        <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-sm text-center">
+            <h2 id="message-modal-title" class="text-2xl font-bold text-gray-800 mb-4"></h2>
+            <p id="message-modal-body" class="text-gray-600 mb-6"></p>
+            <div id="message-modal-actions" class="flex justify-center gap-3"></div>
+        </div>
+    </div>
+    
+    <!-- Main App Screen -->
+    <div id="app-screen" class="hidden flex-grow flex-col">
+        <header class="bg-white shadow-md sticky top-0 z-40">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center flex-wrap gap-4">
+                <div class="flex items-center gap-3">
+                    <img src="logo.png" alt="Logo" class="h-12 w-12 rounded-full" onerror="this.style.display='none'">
+                    <h1 class="text-xl sm:text-2xl font-bold text-gray-800">استبيان وتقييم هيئة التدريس</h1>
+                </div>
+                <div id="header-buttons" class="flex items-center gap-2 sm:gap-3">
+                    <button id="admin-login-btn" class="bg-gray-800 text-white px-4 sm:px-6 py-2 rounded-lg font-semibold hover:bg-gray-900 transition text-sm sm:text-base">تسجيل الدخول</button>
+                    <!-- [!!] تعديل أزرار الإدارة [!!] -->
+                    <button id="view-ratings-btn" class="bg-teal-600 text-white px-4 sm:px-6 py-2 rounded-lg font-semibold hover:bg-teal-700 transition hidden text-sm sm:text-base">عرض التقييمات (إدارة)</button>
+                    <button id="export-excel-btn" class="bg-green-600 text-white px-4 sm:px-6 py-2 rounded-lg font-semibold hover:bg-green-700 transition flex items-center gap-2 hidden text-sm sm:text-base">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                        <!-- [!!] تم تغيير النص هنا [!!] -->
+                        <span>تصدير البيانات (الخام)</span>
+                    </button>
+                    <!-- [!!] زر جديد لتصدير الملخص [!!] -->
+                    <button id="export-summary-btn" class="bg-blue-600 text-white px-4 sm:px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition flex items-center gap-2 hidden text-sm sm:text-base">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><polyline points="17 11 19 13 23 9"></polyline></svg>
+                        <span>تصدير الملخص</span>
+                    </button>
+                    <button id="logout-btn" class="bg-red-600 text-white px-4 sm:px-6 py-2 rounded-lg font-semibold hover:bg-red-700 transition hidden text-sm sm:text-base">خروج</button>
+                </div>
+            </div>
+        </header>
+        
+        <!-- [!!] تعديل المحتوى الرئيسي بالكامل [!!] -->
+        <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow">
+            
+            <!-- Form 1: Staff Rating -->
+            <div class="bg-white rounded-xl shadow-lg p-6 sm:p-8 mb-8 max-w-4xl mx-auto">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">تقييم أعضاء هيئة التدريس</h2>
+                <p class="text-center text-gray-600 mb-6">الرجاء إدخال اسمك، ثم تقييم **جميع** أعضاء هيئة التدريس لإرسال الاستبيان.</p>
+                
+                <form id="rating-form" novalidate>
+                    <div class="space-y-5">
+                        
+                        <input required type="text" id="student-name" placeholder="اسمك (مطلوب لإرسال التقييم)" class="rtl-input w-full p-3 border border-gray-300 rounded-lg text-center font-semibold text-lg">
+                        
+                        <!-- [!!] جدول الدكاترة [!!] -->
+                        <h3 class="text-xl font-bold text-gray-800 pt-4 border-t mt-6">👨‍🏫 الدكاترة</h3>
+                        <div id="doctors-list" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <!-- سيتم ملء هذا القسم عبر الجافاسكريبت -->
+                        </div>
+
+                        <!-- [!!] جدول المعيدين [!!] -->
+                        <h3 class="text-xl font-bold text-gray-800 pt-4 border-t mt-6">👩‍🏫 المعيدين</h3>
+                        <div id="tas-list" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <!-- سيتم ملء هذا القسم عبر الجافاسكريبت -->
+                        </div>
+                        
+                        <button type="submit" id="rating-submit-btn" class="w-full bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold transition hover:bg-blue-700 text-lg mt-8">
+                            إرسال كل التقييمات
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Form 2: General Note -->
+            <div class="bg-white rounded-xl shadow-lg p-6 sm:p-8 max-w-2xl mx-auto">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">ملاحظات عامة</h2>
+                <form id="general-note-form">
+                    <textarea id="general-note" placeholder="هل لديك أي ملاحظات عامة أو مشاكل أخرى تود ذكرها؟" rows="5" class="rtl-input w-full p-3 border border-gray-300 rounded-lg"></textarea>
+                    <button type="submit" id="general-note-btn" class="w-full mt-4 bg-gray-700 text-white px-8 py-3 rounded-lg font-semibold transition hover:bg-gray-800 text-lg">
+                        إرسال ملاحظة عامة
+                    </button>
+                </form>
+            </div>
+
+        </main>
+        
+        <footer class="bg-gray-800 text-white text-center mt-12">
+            <div class="container mx-auto px-4 py-8">
+                <p class="font-bold text-xl mb-6">تحت إشراف إدارة الكلية واتحاد الطلاب</p>
+            </div>
+            <div class="bg-gray-900 py-4">
+                <div class="container mx-auto px-4">
+                    <p class="text-gray-400 text-sm">الموقع من تصميم نديم بدر ليدر ذكاء اصطناعي الفرقة التالتة</p>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Firebase SDKs (v8 style, compatible with Firebase Hosting) -->
+    <script src="/__/firebase/8.10.1/firebase-app.js"></script>
+    <script src="/__/firebase/8.10.1/firebase-auth.js"></script>
+    <script src="/__/firebase/8.10.1/firebase-firestore.js"></script>
+    <!-- This init.js file is provided by Firebase Hosting -->
+    <script src="/__/firebase/init.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- Check if Firebase is initialized by init.js ---
+            if (typeof firebase === 'undefined' || !firebase.app()) {
+                document.getElementById('loader-overlay').classList.add('hidden'); // Hide loader
+                const appScreen = document.getElementById('app-screen');
+                appScreen.innerHTML = `
+                    <div class="container mx-auto p-8 mt-10">
+                        <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-6 rounded-lg shadow-md max-w-2xl mx-auto">
+                            <h2 class="font-bold text-2xl mb-3">خطأ فادح في الإعداد</h2>
+                            <p class="text-lg">لا يمكن العثور على إعدادات Firebase.</p>
+                            <p class="mt-2">هذا التطبيق مصمم للعمل على "Firebase Hosting" ويتوقع ملف <code>/__/firebase/init.js</code>. تأكد من أنك قمت بنشر التطبيق أو أنك تستخدم <code>firebase serve</code>.</p>
+                        </div>
+                    </div>
+                `;
+                appScreen.classList.remove('hidden'); // Show error message
+                throw new Error("Firebase is not initialized. Make sure you are on Firebase Hosting or using the emulator.");
+            }
+
+            // --- Initialize Firebase (v8 namespaced) ---
+            const auth = firebase.auth();
+            const db = firebase.firestore();
+            const provider = new firebase.auth.GoogleAuthProvider();
+            const serverTimestamp = firebase.firestore.FieldValue.serverTimestamp;
+            
+            // Enable debug logging
+            firebase.setLogLevel('debug');
+
+            // --- DOM Elements ---
+            const loaderOverlay = document.getElementById('loader-overlay');
+            const appScreen = document.getElementById('app-screen');
+            const loginModal = document.getElementById('login-modal');
+            const viewRatingsModal = document.getElementById('view-ratings-modal'); // [!!]
+            const messageModal = document.getElementById('message-modal');
+
+            // --- Buttons ---
+            const adminLoginBtn = document.getElementById('admin-login-btn');
+            const googleLoginBtn = document.getElementById('google-login-btn');
+            const logoutBtn = document.getElementById('logout-btn');
+            const exportExcelBtn = document.getElementById('export-excel-btn');
+            const exportSummaryBtn = document.getElementById('export-summary-btn'); // [!!]
+            const viewRatingsBtn = document.getElementById('view-ratings-btn'); // [!!]
+ 
+            // --- Forms & Inputs ---
+            const ratingForm = document.getElementById('rating-form'); // [!!]
+            const generalNoteForm = document.getElementById('general-note-form'); // [!!]
+
+            // --- App State ---
+            let allRatings = []; // [!!]
+            let allGeneralNotes = []; // [!!] إضافة متغير جديد للملاحظات العامة
+            let isAdminLoggedIn = false;
+            let currentUser = null;
+            let unsubscribeRatings = null; // [!!]
+            let unsubscribeGeneralNotes = null; // [!!] إضافة متغير جديد
+            
+            // !! هام: قم بتغيير الإيميلات المصرح لها بالدخول كمسؤول
+            const ADMIN_EMAILS = ['nadembadrs2@gmail.com', 'dr.sayed.666@gmail.com'];
+
+            // [!!] قائمة بأسماء هيئة التدريس [!!]
+            const staffList = [
+                { id: 'dr-abdelSalam', name: 'د. عبدالسلام', type: 'doctor' },
+                { id: 'dr-sayed-elfar', name: 'د. سيد الفار', type: 'doctor' },
+                { id: 'dr-amr-koshk', name: 'د. عمرو كشك', type: 'doctor' },
+                { id: 'dr-mohamed-mandour', name: 'د. محمد مندور', type: 'doctor' },
+                { id: 'dr-alaa', name: 'د. آلاء', type: 'doctor' },
+                { id: 'dr-naglaa', name: 'د. نجلاء', type: 'doctor' },
+                { id: 'ta-hanin', name: 'م. حنين', type: 'ta' },
+                { id: 'ta-maram', name: 'م. مرام', type: 'ta' },
+                { id: 'ta-iman', name: 'م. إيمان', type: 'ta' },
+                { id: 'ta-nadia', name: 'م. نادية', type: 'ta' },
+                { id: 'ta-abdelaziz', name: 'م. عبدالعزيز', type: 'ta' },
+                { id: 'ta-mohamed', name: 'م. محمد', type: 'ta' }
+            ];
+
+            // --- Utility Functions ---
+            const sanitizeHTML = (str) => {
+                const temp = document.createElement('div');
+                temp.textContent = str;
+                return temp.innerHTML;
+            };
+
+            const showLoader = () => loaderOverlay.classList.remove('hidden');
+            const hideLoader = () => loaderOverlay.classList.add('hidden');
+            const closeAllModals = () => {
+                document.querySelectorAll('.modal-backdrop').forEach(modal => modal.classList.add('hidden'));
+            }
+
+            function showMessageModal(title, body, actions = null) {
+                document.getElementById('message-modal-title').textContent = title;
+                document.getElementById('message-modal-body').innerHTML = body;
+                const actionsContainer = document.getElementById('message-modal-actions');
+                actionsContainer.innerHTML = ''; 
+                
+                if (actions && actions.length > 0) {
+                    actions.forEach(action => {
+                        const button = document.createElement('button');
+                        button.textContent = action.text;
+                        button.className = action.class;
+                        if (action.callback) button.onclick = action.callback;
+                        actionsContainer.appendChild(button);
+                    });
+                } else {
+                    actionsContainer.innerHTML = `<button class="bg-blue-600 text-white px-8 py-2 rounded-lg font-semibold hover:bg-blue-700 transition">حسنًا</button>`;
+                    actionsContainer.firstChild.onclick = closeAllModals;
+                }
+                messageModal.classList.remove('hidden');
+            }
+            
+            // --- Core App Logic ---
+
+            /**
+             * [!!] دالة جديدة لإنشاء بطاقات التقييم في الجداول [!!]
+             */
+            function renderRatingCards() {
+                const doctorsContainer = document.getElementById('doctors-list');
+                const tasContainer = document.getElementById('tas-list');
+                doctorsContainer.innerHTML = '';
+                tasContainer.innerHTML = '';
+
+                staffList.forEach(staff => {
+                    // [!!] تم فصل الأكواد لتسهيل القراءة [!!]
+                    const starRatingHTML = `
+                        <div class="star-rating">
+                            <input type="radio" id="star5-${staff.id}" name="rating-${staff.id}" value="5" required><label for="star5-${staff.id}" title="5 نجوم">&#9733;</label>
+                            <input type="radio" id="star4-${staff.id}" name="rating-${staff.id}" value="4"><label for="star4-${staff.id}" title="4 نجوم">&#9733;</label>
+                            <input type="radio" id="star3-${staff.id}" name="rating-${staff.id}" value="3"><label for="star3-${staff.id}" title="3 نجوم">&#9733;</label>
+                            <input type="radio" id="star2-${staff.id}" name="rating-${staff.id}" value="2"><label for="star2-${staff.id}" title="2 نجوم">&#9733;</label>
+                            <input type="radio" id="star1-${staff.id}" name="rating-${staff.id}" value="1"><label for="star1-${staff.id}" title="1 نجمة">&#9733;</label>
+                        </div>
+                    `;
+                    const noteHTML = `<textarea id="note-${staff.id}" placeholder="ملاحظة خاصة (اختياري)" rows="2" class="rtl-input w-full p-2 border border-gray-300 rounded-lg mt-3 text-sm"></textarea>`;
+
+                    let cardHTML;
+
+                    if (staff.type === 'doctor') {
+                        cardHTML = `
+                        <div class="rating-card" data-staff-id="${staff.id}" data-staff-name="${sanitizeHTML(staff.name)}" data-staff-type="doctor">
+                            <h4 class="font-semibold text-lg text-gray-800 text-center mb-2">${sanitizeHTML(staff.name)}</h4>
+                            ${starRatingHTML}
+                            ${noteHTML}
+                        </div>
+                        `;
+                        doctorsContainer.innerHTML += cardHTML;
+                    } else {
+                        // [!!] بطاقة المعيد أصبحت تحتوي على صندوق الاختيار [!!]
+                        cardHTML = `
+                        <div class="rating-card" data-staff-id="${staff.id}" data-staff-name="${sanitizeHTML(staff.name)}" data-staff-type="ta">
+                            <h4 class="font-semibold text-lg text-gray-800 text-center mb-2">${sanitizeHTML(staff.name)}</h4>
+                            
+                            <!-- Stars (will be toggled) -->
+                            <div class="star-rating-container">${starRatingHTML}</div>
+                            
+                            <!-- Note (will be toggled) -->
+                            <div class="note-container">${noteHTML}</div>
+                            
+                            <!-- "Doesn't Teach Me" Checkbox -->
+                            <div class="mt-4 text-center">
+                                <input type="checkbox" id="no-teach-${staff.id}" name="no-teach-${staff.id}" class="no-teach-checkbox" data-staff-id="${staff.id}">
+                                <label for="no-teach-${staff.id}" class="mr-2 text-sm text-gray-700 select-none cursor-pointer">هذا المعيد لا يدرس لي</label>
+                            </div>
+                        </div>
+                        `;
+                        tasContainer.innerHTML += cardHTML;
+                    }
+                });
+
+                // [!!] إضافة مستمع أحداث لصناديق الاختيار الجديدة [!!]
+                document.querySelectorAll('.no-teach-checkbox').forEach(checkbox => {
+                    checkbox.addEventListener('change', (e) => {
+                        const staffId = e.target.dataset.staffId;
+                        const card = e.target.closest('.rating-card');
+                        const starContainer = card.querySelector('.star-rating-container');
+                        const noteContainer = card.querySelector('.note-container');
+                        const starInputs = starContainer.querySelectorAll('input[type="radio"]');
+
+                        if (e.target.checked) {
+                            // إخفاء النجوم والملاحظات، وإلغاء الحاجة للتقييم
+                            starContainer.classList.add('hidden');
+                            noteContainer.classList.add('hidden');
+                            starInputs.forEach(input => {
+                                input.required = false;
+                                input.checked = false; // مسح أي اختيار سابق
+                            });
+                        } else {
+                            // إظهار النجوم والملاحظات، وإعادة الحاجة للتقييم
+                            starContainer.classList.remove('hidden');
+                            noteContainer.classList.remove('hidden');
+                            starInputs.forEach(input => input.required = true);
+                        }
+                    });
+                });
+            }
+
+            /**
+             * Attaches the live listener to the ratings collection.
+             */
+            function initializeDataListeners() {
+                console.log("Initializing data listeners...");
+                if (unsubscribeRatings) {
+                    unsubscribeRatings();
+                }
+                if (unsubscribeGeneralNotes) { // [!!]
+                    unsubscribeGeneralNotes(); // [!!]
+                }
+                
+                // [!!] اسم المجموعة الجديد [!!]
+                const ratingsCollectionRef = db.collection("staff_ratings");
+                const q = ratingsCollectionRef.orderBy("createdAt", "desc");
+                
+                unsubscribeRatings = q.onSnapshot((snapshot) => {
+                    allRatings = snapshot.docs.map(doc => ({ ...doc.data(), docId: doc.id }));
+                    console.log(`Fetched ${allRatings.length} ratings.`);
+                }, (error) => {
+                    console.error("Error listening to ratings collection: ", error);
+                    showMessageModal('خطأ فادح', 'خطأ في تحميل بيانات التقييمات. حاول تحديث الصفحة.');
+                });
+
+                // [!!] إضافة مستمع جديد للملاحظات العامة [!!]
+                const notesCollectionRef = db.collection("general_notes");
+                const qNotes = notesCollectionRef.orderBy("createdAt", "desc");
+
+                unsubscribeGeneralNotes = qNotes.onSnapshot((snapshot) => {
+                    allGeneralNotes = snapshot.docs.map(doc => ({ ...doc.data(), docId: doc.id }));
+                    console.log(`Fetched ${allGeneralNotes.length} general notes.`);
+                }, (error) => {
+                    console.error("Error listening to general notes collection: ", error);
+                    // لا نعرض رسالة خطأ فادح هنا حتى لا نزعج المستخدم
+                });
+            }
+
+            /**
+             * Updates UI based on authentication state.
+             */
+            function updateUIAfterAuthStateChange(user) {
+                currentUser = user; 
+                const isUserLoggedIn = !!(user && !user.isAnonymous);
+                isAdminLoggedIn = isUserLoggedIn && user.email && ADMIN_EMAILS.includes(user.email.toLowerCase());
+                
+                console.log(`Auth state changed. User: ${user?.uid}, Admin: ${isAdminLoggedIn}`);
+
+                adminLoginBtn.classList.toggle('hidden', isUserLoggedIn);
+                logoutBtn.classList.toggle('hidden', !isUserLoggedIn);
+                exportExcelBtn.classList.toggle('hidden', !isAdminLoggedIn);
+                exportSummaryBtn.classList.toggle('hidden', !isAdminLoggedIn); // [!!]
+                viewRatingsBtn.classList.toggle('hidden', !isAdminLoggedIn); // [!!]
+            }
+            
+            /**
+             * [!!] تم تعديل منطق الإرسال بالكامل [!!]
+             * Handles the rating form submission.
+             */
+            async function handleRatingSubmit(e) {
+                e.preventDefault();
+                
+                const studentNameInput = document.getElementById('student-name');
+                const studentName = studentNameInput.value.trim();
+
+                if (!studentName) {
+                    showMessageModal('خطأ', 'الرجاء إدخال اسمك أولاً.');
+                    studentNameInput.focus();
+                    return;
+                }
+
+                const ratingsToSubmit = [];
+                let allRated = true;
+
+                for (const staff of staffList) {
+                    // [!!] تعديل منطق التحقق من التقييم [!!]
+                    const noTeachCheckbox = document.getElementById(`no-teach-${staff.id}`); // التحقق من وجود الصندوق
+                    let ratingInput = document.querySelector(`input[name="rating-${staff.id}"]:checked`);
+                    let note = document.getElementById(`note-${staff.id}`).value.trim();
+                    let ratingValue = null;
+
+                    if (noTeachCheckbox && noTeachCheckbox.checked) {
+                        // إذا كان "لا يدرس لي" محدداً
+                        ratingValue = 0; // سنستخدم 0 كعلامة لـ "لا يدرس لي"
+                        note = "لا يدرس لي";
+                    } else {
+                        // هذا دكتور، أو معيد يدرسه
+                        if (!ratingInput) {
+                            allRated = false; // التقييم ناقص
+                            break;
+                        }
+                        ratingValue = parseInt(ratingInput.value, 10);
+                    }
+                    
+                    ratingsToSubmit.push({
+                        studentName: studentName,
+                        staffName: staff.name,
+                        rating: ratingValue,
+                        note: note
+                    });
+                }
+
+                if (!allRated) {
+                    showMessageModal('خطأ', 'الرجاء تقييم **جميع** الدكاترة والمعيدين قبل الإرسال.');
+                    return;
+                }
+                
+                const submitBtn = document.getElementById('rating-submit-btn');
+                submitBtn.disabled = true;
+                showLoader();
+                
+                try {
+                    // [!!] استخدام Batched Write لإرسال جميع التقييمات مرة واحدة [!!]
+                    const batch = db.batch();
+                    const ratingsRef = db.collection("staff_ratings");
+                    const timestamp = serverTimestamp();
+
+                    for (const ratingData of ratingsToSubmit) {
+                        const newRatingRef = ratingsRef.doc(); // إنشاء معرف مستند جديد
+                        ratingData.createdAt = timestamp; // إضافة وقت الإنشاء
+                        batch.set(newRatingRef, ratingData);
+                    }
+
+                    await batch.commit(); // إرسال الدفعة كاملة
+                    
+                    showMessageModal('شكراً لك!', `تم تسجيل جميع تقييماتك بنجاح.`);
+                    ratingForm.reset();
+                    
+                } catch (error) {
+                    console.error("Error saving ratings batch:", error);
+                    showMessageModal('خطأ', `حدث خطأ أثناء حفظ التقييمات. ${error.message}`);
+                } finally {
+                    hideLoader(); 
+                    submitBtn.disabled = false;
+                }
+            }
+
+            /**
+             * Handles the general note submission.
+             */
+            async function handleGeneralNoteSubmit(e) {
+                e.preventDefault();
+                const noteInput = document.getElementById('general-note');
+                const note = noteInput.value.trim();
+                
+                if (!note) {
+                    showMessageModal('خطأ', 'الرجاء كتابة ملاحظة أولاً.');
+                    noteInput.focus();
+                    return;
+                }
+
+                const submitBtn = document.getElementById('general-note-btn');
+                submitBtn.disabled = true;
+                showLoader();
+                
+                try {
+                    const notesRef = db.collection("general_notes"); // [!!]
+                    await notesRef.add({
+                        note: note,
+                        createdAt: serverTimestamp()
+                    });
+                    
+                    showMessageModal('شكراً لك!', 'تم إرسال ملاحظتك العامة بنجاح.');
+                    generalNoteForm.reset();
+                    
+                } catch (error) {
+                    console.error("Error saving general note:", error);
+                    showMessageModal('خطأ', `حدث خطأ أثناء حفظ الملاحظة. ${error.message}`);
+                } finally {
+                    hideLoader();
+                    submitBtn.disabled = false;
+                }
+            }
+            
+            /**
+             * (Admin) Deletes a rating after confirmation.
+             */
+            async function performRatingDelete(docId) {
+                if (!isAdminLoggedIn) {
+                    showMessageModal('خطأ', 'ليس لديك صلاحيات الحذف.');
+                    return;
+                }
+                
+                showLoader();
+                try {
+                    const ratingDocRef = db.collection("staff_ratings").doc(docId); // [!!]
+                    await ratingDocRef.delete();
+                    showMessageModal('نجاح', 'تم حذف التقييم بنجاح.');
+                } catch (error) {
+                    console.error("Error deleting rating:", error);
+                    showMessageModal('خطأ', 'حدث خطأ أثناء الحذف.');
+                } finally {
+                    hideLoader();
+                    closeAllModals(); 
+                }
+            }
+
+            /**
+             * (Admin) Opens the modal to view all registered ratings in a table.
+             */
+            function handleViewRatingsClick() { // [!!]
+                const tableBody = document.getElementById('ratings-table-body'); // [!!]
+                document.getElementById('view-modal-title').textContent = `التقييمات المسجلة (${allRatings.length})`;
+                tableBody.innerHTML = ''; 
+                
+                if (allRatings.length === 0) {
+                    tableBody.innerHTML = `<tr><td colspan="5" class="text-center py-10 text-gray-500">لا توجد تقييمات مسجلة حالياً.</td></tr>`;
+                } else {
+                    // Sort by staff name then student name
+                    const sortedRatings = [...allRatings].sort((a, b) => { // [!!]
+                        if (a.staffName < b.staffName) return -1;
+                        if (a.staffName > b.staffName) return 1;
+                        if (a.studentName < b.studentName) return -1;
+                        if (a.studentName > b.studentName) return 1;
+                        return 0;
+                    });
+                    
+                    sortedRatings.forEach(rating => { // [!!]
+                        const row = tableBody.insertRow();
+                        
+                        // [!!] تعديل منطق عرض التقييم [!!]
+                        const ratingValue = rating.rating;
+                        let ratingDisplay;
+                        if (ratingValue === 0) {
+                            ratingDisplay = `<span class="text-sm text-gray-500">لا يدرس له</span>`;
+                        } else {
+                            ratingDisplay = `<span class="text-lg text-amber-500">${'&#9733;'.repeat(ratingValue)}</span>`;
+                        }
+                        
+                        row.innerHTML = `
+                            <td class="px-6 py-4 whitespace-nowrap">${sanitizeHTML(rating.studentName)}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">${sanitizeHTML(rating.staffName)}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-center">${ratingDisplay}</td>
+                            <td class="px-6 py-4 whitespace-pre-wrap min-w-[200px]">${sanitizeHTML(rating.note) || '-'}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-left">
+                                <button data-doc-id="${rating.docId}" class="delete-rating-btn text-red-600 hover:text-red-900">حذف</button>
+                            </td>
+                        `;
+                    });
+                }
+
+                viewRatingsModal.classList.remove('hidden'); // [!!]
+                
+                // Add event listeners to delete buttons
+                document.querySelectorAll('.delete-rating-btn').forEach(btn => { // [!!]
+                    btn.addEventListener('click', (e) => {
+                        const docId = e.currentTarget.dataset.docId;
+                        showMessageModal('تأكيد الحذف', 'هل أنت متأكد من حذف هذا التقييم؟', [
+                            { text: 'إلغاء', class: 'flex-1 bg-gray-200 text-gray-800 px-6 py-2 rounded-lg font-semibold hover:bg-gray-300', callback: closeAllModals },
+                            { text: 'تأكيد الحذف', class: 'flex-1 bg-red-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-red-700', callback: () => performRatingDelete(docId) } // [!!]
+                        ]);
+                    });
+                });
+            }
+            
+            /**
+             * (Admin) Exports all rating data to an Excel file.
+             */
+            function handleExportClick() {
+                if (allRatings.length === 0) { // [!!]
+                    showMessageModal('تنبيه', 'لا يوجد بيانات لتصديرها.'); 
+                    return; 
+                }
+                
+                const dataToExport = allRatings.map(p => ({ // [!!]
+                    'اسم الطالب': p.studentName,
+                    'الدكتور/المعيد': p.staffName,
+                    // [!!] تعديل خانة التقييم في الإكسل [!!]
+                    'التقييم (من 5)': p.rating === 0 ? 'لا يدرس له' : p.rating,
+                    'ملاحظة خاصة': p.note,
+                    'تاريخ التسجيل': p.createdAt?.toDate ? p.createdAt.toDate().toLocaleString('ar-EG') : 'غير متاح'
+                }));
+
+                const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+                const workbook = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(workbook, worksheet, 'بيانات التقييمات');
+                
+                // Set column widths
+                worksheet['!cols'] = [ { wch: 25 }, { wch: 25 }, { wch: 15 }, { wch: 50 }, { wch: 20 } ];
+                
+                XLSX.writeFile(workbook, 'تقييمات_أعضاء_هيئة_التدريس.xlsx'); // [!!]
+            }
+
+            /**
+             * [!!] دالة جديدة لتصدير ملخص التقييمات [!!]
+             * (Admin) Exports a summary of all ratings to an Excel file.
+             */
+            function handleExportSummaryClick() {
+                if (allRatings.length === 0 && allGeneralNotes.length === 0) { // [!!] تعديل الشرط
+                    showMessageModal('تنبيه', 'لا يوجد بيانات لإنشاء ملخص.'); 
+                    return; 
+                }
+
+                // --- 1. معالجة ملخص تقييمات هيئة التدريس ---
+                const staffSummary = new Map();
+                staffList.forEach(staff => {
+                    staffSummary.set(staff.name, {
+                        totalVotes: 0,
+                        doesNotTeach: 0,
+                        actualRatings: 0,
+                        totalRatingSum: 0,
+                        notes: [] // [!!] إضافة مصفوفة للملاحظات
+                    });
+                });
+
+                // 2. تجميع البيانات من allRatings
+                allRatings.forEach(rating => {
+                    const summary = staffSummary.get(rating.staffName);
+                    if (!summary) return; 
+
+                    summary.totalVotes++;
+                    if (rating.rating === 0) {
+                        summary.doesNotTeach++;
+                    } else {
+                        summary.actualRatings++;
+                        summary.totalRatingSum += rating.rating;
+                        // [!!] إضافة الملاحظة إذا كانت موجودة [!!]
+                        if (rating.note && rating.note.trim() !== "" && rating.note.trim() !== "لا يدرس لي") {
+                            summary.notes.push(rating.note);
+                        }
+                    }
+                });
+
+                // 3. تحويل الخريطة إلى مصفوفة لتصديرها
+                const staffDataToExport = []; // [!!]
+                staffSummary.forEach((summary, staffName) => {
+                    let averageRating = 'N/A';
+                    if (summary.actualRatings > 0) {
+                        // حساب المتوسط وتقريبه لأقرب منزلتين عشريتين
+                        averageRating = (summary.totalRatingSum / summary.actualRatings).toFixed(2);
+                    }
+
+                    staffDataToExport.push({ // [!!]
+                        'الدكتور/المعيد': staffName,
+                        'متوسط التقييم (من 5)': averageRating,
+                        'عدد المقيمين (الفعلي)': summary.actualRatings,
+                        'عدد (لا يدرس لي)': summary.doesNotTeach,
+                        'إجمالي عدد الأصوات': summary.totalVotes,
+                        // [!!] دمج الملاحظات في خلية واحدة [!!]
+                        'الملاحظات الخاصة': summary.notes.join('\n') 
+                    });
+                });
+
+                // --- 2. معالجة الملاحظات العامة ---
+                const generalNotesToExport = allGeneralNotes.map(note => ({
+                    'الملاحظة العامة': note.note,
+                    'تاريخ التسجيل': note.createdAt?.toDate ? note.createdAt.toDate().toLocaleString('ar-EG') : 'غير متاح'
+                }));
+
+                // 4. إنشاء ملف الإكسل (متعدد الصفحات)
+                const workbook = XLSX.utils.book_new();
+                
+                // [!!] الصفحة الأولى: ملخص التقييمات [!!]
+                const wsSummary = XLSX.utils.json_to_sheet(staffDataToExport);
+                XLSX.utils.book_append_sheet(workbook, wsSummary, 'ملخص التقييمات');
+                // Set column widths for summary sheet
+                wsSummary['!cols'] = [ { wch: 25 }, { wch: 20 }, { wch: 20 }, { wch: 20 }, { wch: 20 }, { wch: 100 } ]; // [!!]
+                
+                // [!!] الصفحة الثانية: الملاحظات العامة (فقط إذا وجدت) [!!]
+                if (generalNotesToExport.length > 0) {
+                    const wsGeneralNotes = XLSX.utils.json_to_sheet(generalNotesToExport);
+                    XLSX.utils.book_append_sheet(workbook, wsGeneralNotes, 'الملاحظات العامة');
+                    // Set column widths for general notes sheet
+                    wsGeneralNotes['!cols'] = [ { wch: 100 }, { wch: 20 } ];
+                }
+                
+                XLSX.writeFile(workbook, 'ملخص_التقييمات_النهائي.xlsx');
+            }
+
+            // --- Event Listeners Setup ---
+            
+            // Modal close buttons
+            document.getElementById('cancel-login-btn').addEventListener('click', closeAllModals);
+            document.getElementById('close-view-btn').addEventListener('click', closeAllModals);
+
+            // Form submission
+            ratingForm.addEventListener('submit', handleRatingSubmit); // [!!]
+            generalNoteForm.addEventListener('submit', handleGeneralNoteSubmit); // [!!]
+
+            // Admin buttons
+            adminLoginBtn.addEventListener('click', () => loginModal.classList.remove('hidden'));
+            viewRatingsBtn.addEventListener('click', handleViewRatingsClick); // [!!]
+            exportExcelBtn.addEventListener('click', handleExportClick);
+            exportSummaryBtn.addEventListener('click', handleExportSummaryClick); // [!!]
+            
+            logoutBtn.addEventListener('click', () => {
+                auth.signOut().catch(e => console.error("Sign out error", e));
+            });
+            
+            googleLoginBtn.addEventListener('click', async () => {
+                const loginError = document.getElementById('login-error');
+                loginError.classList.add('hidden');
+                try {
+                    const result = await auth.signInWithPopup(provider);
+                    if (!ADMIN_EMAILS.includes(result.user.email.toLowerCase())) {
+                        await auth.signOut();
+                        loginError.classList.remove('hidden');
+                    } else {
+                        closeAllModals();
+                    }
+                } catch (error) {
+                    console.error("Google Sign-In failed:", error);
+                    showMessageModal('خطأ', 'فشل تسجيل الدخول باستخدام Google. حاول مرة أخرى.');
+                }
+            });
+            
+            // --- App Start Logic (v8 style) ---
+            auth.onAuthStateChanged(async (user) => {
+                showLoader();
+                if (user) { 
+                    // User is signed in (either real or anonymous)
+                    updateUIAfterAuthStateChange(user);
+                    appScreen.classList.remove('hidden');
+                    appScreen.classList.add('flex');
+                    
+                    if (!appScreen.classList.contains('initialized')) {
+                        renderRatingCards(); // [!!] استدعاء الدالة لإنشاء الجداول
+                        initializeDataListeners();
+                        appScreen.classList.add('initialized');
+                    }
+                    
+                    hideLoader();
+                } else { 
+                    // User is signed out, sign them in anonymously
+                    console.log("No user, signing in anonymously...");
+                    try {
+                        await auth.signInAnonymously();
+                        // onAuthStateChanged will be called again with the new user
+                    } catch (error) {
+                        console.error("Anonymous sign-in failed:", error);
+                        hideLoader();
+                        showMessageModal('خطأ فادح', 'لا يمكن الاتصال بالخادم. يرجى تحديث الصفحة.');
+                    }
+                }
+            });
+
+        }); // End DOMContentLoaded
+    </script>
+</body>
+</html>
+
+
+
+
+

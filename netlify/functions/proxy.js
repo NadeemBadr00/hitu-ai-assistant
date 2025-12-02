@@ -60,7 +60,7 @@ exports.handler = async function(event, context) {
       apiKey = getNextKey('chat');
       if (!apiKey) return jsonResponse(500, { error: 'Chat API keys not configured on server' });
 
-      apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+      apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
       apiPayload = payload;
 
     } else if (type === 'tts') {
